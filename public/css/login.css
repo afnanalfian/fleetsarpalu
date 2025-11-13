@@ -1,32 +1,47 @@
 :root {
-    --light: #f3f6f9;
-    --primary: #FFC55A;
-    --primary-hover: #fdb838;
-    --black: #0f0f0f;
-    --white: #fff;
+    --light-bg: #F4EFE3;
+    --primary: #6b88ee;
+    --primary-hover: #1768d2;
+    --navy: #0A1A2F;
+    --navy-hover: #0C223B;
+    --white: #FFFFFF;
+    --text-dark: #12212F;
 }
 
+/* Background halaman */
 .bg-log {
-    background-color: var(--white);
+    background-color: var(--light-bg);
 }
 
+/* Tombol default jadi navy */
+.button {
+    background-color: var(--navy);
+    color: var(--white);
+    transition: 0.25s ease;
+}
+
+.button:hover {
+    background-color: var(--navy-hover);
+    color: var(--white);
+}
+
+/* Fokus form */
+.form-control:focus {
+    box-shadow: 0 0 0 .2rem rgba(255, 111, 0, 0.35); /* primary glow */
+}
+
+/* Opsional: teks */
+body {
+    color: var(--text-dark);
+    background: var(--light-bg);
+}
+
+/* Icon tetap */
 .icon {
     position: absolute;
     right: 30px;
 }
 
-.button {
-    background-color: var(--primary);
-}
-
-.button:hover {
-    background-color: #000000;
-    color: var(--white);
-}
-
-.form-control:focus {
-    box-shadow: 0 0 0 .2rem var(--primary);
-}
 
 
 @media (min-width: 1920px) {

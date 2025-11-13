@@ -7,75 +7,69 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    function login()
+    public function login()
     {
-        return view('login.login');
+        return view('auth.login');
     }
 
-    function storelogin(Request $request)
+    public function storelogin(Request $request)
     {
         $messages = [
             'required' => 'Kolom :attribute belum terisi.',
-            'alpha_dash' => 'Kolom :attribute hanya boleh berisi huruf, angka, (-), (_).',
-            'lowercase' => 'Kolom :attribute hanya dapat diisi huruf kecil',
-            'username.max' => 'Kolom username maksmial berisi 15 karakter.',
+            'email' => 'Kolom :attribute harus berformat email yang valid.',
             'password.max' => 'Kolom password maksimal berisi 50 karakter.',
         ];
 
-        $request->validate([
-            'username' => 'required|max:15|alpha_dash:ascii|lowercase',
-            'password' => 'required|max:50', 
-        ],$messages);
+        $credentials = $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|max:50',
+        ], $messages);
 
-        $inputeddata = [
-            'username' => $request->input('username'),
-            'password' => $request->input('password'),
-        ];
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $user = Auth::user();
 
-        if(Auth::attempt($inputeddata)) {
-            if (Auth::user()->kelompok == 'admin') {
-                flash()
-                ->killer(true)
-                ->layout('bottomRight')
-                ->timeout(3000)
-                ->success('<b>Berhasil!</b><br>Proses login berhasil.');
-
-                return redirect(route('admin.dashboard'));
-            }elseif (Auth::user()->kelompok == 'pegawai') {
-                flash()
-                ->killer(true)
-                ->layout('bottomRight')
-                ->timeout(3000)
-                ->success('<b>Berhasil!</b><br>Proses login berhasil.');
-
-                return redirect(route('pegawai.homepage'));
-            }elseif (Auth::user()->kelompok == 'kendaraan') {
-                flash()
-                ->killer(true)
-                ->layout('bottomRight')
-                ->timeout(3000)
-                ->success('<b>Berhasil!</b><br>Proses login berhasil.');
-
-                return redirect(route('kendaraan.dashboard'));
+            if (!$user->role) {
+                Auth::logout();
+                flash()->addError('<b>Error!</b><br>Akun tidak memiliki role.');
+                return redirect()->route('login');
             }
-        }else {
-            flash()
-            ->killer(true)
-            ->layout('bottomRight')
-            ->timeout(3000)
-            ->error('<b>Error!</b><br>Proses login gagal.');
-    
-            return redirect(route('login'))
-                ->withErrors([
-                    'username' => 'Nama Pengguna atau Sandi Tidak Sesuai',
-                    'password' => 'Nama Pengguna atau Sandi Tidak Sesuai'
-                ])->withInput();
+
+            switch ($user->role) {
+                case 'Admin':
+                    flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
+                    return redirect()->route('admin.dashboard');
+
+                case 'Pegawai':
+                    flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
+                    return redirect()->route('pegawai.dashboard');
+
+                case 'Sumda':
+                    flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
+                    return redirect()->route('sumda.dashboard');
+
+                case 'Ketua Tim':
+                    flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
+                    return redirect()->route('ketuatim.dashboard');
+
+                default:
+                    Auth::logout();
+                    flash()->addError('<b>Error!</b><br>Role tidak dikenali.');
+                    return redirect()->route('login');
+            }
         }
+
+        flash()->addError('<b>Error!</b><br>Email atau sandi tidak sesuai.');
+        return back()->withInput();
     }
 
-    function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
-        return redirect(route('login'));
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        flash()->addInfo('<b>Info</b><br>Anda telah logout.');
+        return redirect()->route('login');
     }
 }

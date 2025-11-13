@@ -13,11 +13,23 @@ class UserAccess
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $kelompok): Response
+    public function handle(Request $request, Closure $next, $role): Response
     {
-        if(auth()->user()->kelompok == $kelompok){
+        // Pastikan user login
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        // Samakan format huruf
+        $userRole = strtolower(auth()->user()->role);
+        $requiredRole = strtolower($role);
+
+        // Cek role
+        if ($userRole === $requiredRole) {
             return $next($request);
         }
-        return redirect('home');
+
+        return redirect('/home');
     }
+
 }
