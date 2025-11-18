@@ -88,10 +88,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('/checkitem', CheckItemController::class)
         ->middleware('userAccess:ketua tim');
 
-    // Attendance → Ketua Tim
-    Route::resource('/attendance', AttendanceController::class)
-        ->middleware('userAccess:ketua tim');
-
     // Reports → Admin + Pegawai
     Route::get('/reports', [UseReportController::class, 'index'])
         ->name('reports.index')
@@ -127,6 +123,33 @@ Route::middleware('auth')->group(function () {
         ->name('usereports.update');
     Route::get('/usereports/{id}', [UseReportController::class, 'show'])
         ->name('usereports.show');
+
+    // CHECKINGS
+    Route::get('/checkings', [CheckingController::class, 'index'])->name('checkings.index');
+    Route::get('/checkings/create', [CheckingController::class, 'create'])->name('checkings.create');
+    Route::post('/checkings', [CheckingController::class, 'store'])->name('checkings.store');
+
+    Route::get('/checkings/{id}', [CheckingController::class, 'show'])->name('checkings.show');
+    Route::get('/checkings/{id}/edit', [CheckingController::class, 'edit'])->name('checkings.edit');
+    Route::put('/checkings/{id}', [CheckingController::class, 'update'])->name('checkings.update');
+    Route::delete('/checkings/{id}', [CheckingController::class, 'destroy'])->name('checkings.destroy');
+
+
+    // CHECK ITEMS (Item pengecekan kendaraan)
+    Route::get('/checkitems/{check_id}/{vehicle_id}/create', [CheckItemController::class, 'create'])->name('checkitems.create');
+    Route::post('/checkitems/{check_id}/{vehicle_id}', [CheckItemController::class, 'store'])->name('checkitems.store');
+
+    Route::get('/checkitems/{id}', [CheckItemController::class, 'show'])->name('checkitems.show');
+    Route::get('/checkitems/{id}/edit', [CheckItemController::class, 'edit'])->name('checkitems.edit');
+    Route::put('/checkitems/{id}', [CheckItemController::class, 'update'])->name('checkitems.update');
+
+    // ATTENDANCES
+    Route::get('/attendances/{check_id}/create', [AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('/attendances/{check_id}', [AttendanceController::class, 'store'])->name('attendances.store');
+
+    Route::get('/attendances/{id}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
+    Route::put('/attendances/{id}', [AttendanceController::class, 'update'])->name('attendances.update');
+
 
 
 });

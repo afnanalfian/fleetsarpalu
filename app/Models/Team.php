@@ -45,4 +45,9 @@ class Team extends Model
     {
         return $this->leader ? $this->leader->name : '-';
     }
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
 }

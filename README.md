@@ -1,6 +1,6 @@
-# Sistem Informasi Kendaraan
+# Sistem Informasi Manajemen Kendaraan Operasional Basarnas
 
-Sistem informasi kendaraan memungkinkan pengguna untuk melakukan serangkaian operasi, seperti; 
+In collaboration with Muhammad Arfian Pratama (Basarnas Palu)
 
 Manajemen Kendaraan
 - Menambah data kendaraan.
@@ -10,6 +10,8 @@ Manajemen Kendaraan
 - Melihat jumlah pengajuan peminjaman kendaraan.
 - Melihat arsip data peminjaman kendaraan.
 - Memverifkasi pengajuan peminjaman kendaraan.
+- Menambah data pengecekan rutin kendaraan.
+- Melihat arsip data pengecekan rutin kendaraan.
 
 Admin
 - Menambah data pegawai.

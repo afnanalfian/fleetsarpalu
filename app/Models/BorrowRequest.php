@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class BorrowRequest extends Model
 {
@@ -30,9 +31,11 @@ class BorrowRequest extends Model
     ];
 
     protected $casts = [
-        'start_at' => 'datetime',
-        'end_at' => 'datetime',
-        'approved_at' => 'datetime',
+    'start_at' => 'date:Y-m-d',
+    'end_at'   => 'date:Y-m-d',
+    'start_time' => 'string',
+    'end_time'   => 'string',
+    'approved_at' => 'datetime',
     ];
 
     // RELATIONS
@@ -49,10 +52,16 @@ class BorrowRequest extends Model
 
     public function updateStatusAutomatically()
     {
-        $now = now();
+        if (!$this->start_at || !$this->start_time || !$this->end_at || !$this->end_time) {
+            return;
+        }
 
-        // Ubah status ke "In Use" hanya ketika waktunya tiba
-        if ($this->status === 'Approved' && $now->gte($this->start_at) && $now->lte($this->end_at)) {
+        // Laravel now guarantees start_at is pure DATE because of casting
+        $start = Carbon::parse($this->start_at->format('Y-m-d').' '.$this->start_time);
+        $end   = Carbon::parse($this->end_at->format('Y-m-d').' '.$this->end_time);
+        $now   = now();
+
+        if ($this->status === 'Approved' && $now->between($start, $end)) {
             $this->update(['status' => 'In Use']);
         }
     }

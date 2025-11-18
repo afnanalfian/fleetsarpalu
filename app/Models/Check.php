@@ -18,6 +18,11 @@ class Check extends Model
     ];
 
     protected $dates = ['date'];
+    protected $casts = [
+        'scheduled_date' => 'date',
+        'started_at'     => 'datetime',
+        'completed_at'   => 'datetime',
+    ];
 
     /**
      * 🔗 Relasi ke tim yang melakukan pengecekan
@@ -59,4 +64,38 @@ class Check extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    public function updateStatus()
+    {
+        // Pending → In Progress
+        if ($this->status === 'pending') {
+
+            $hasAttendance = $this->attendances()->exists();
+            $hasItem = $this->items()->exists();
+
+            if ($hasAttendance || $hasItem) {
+                $this->update([
+                    'status' => 'in_progress',
+                    'started_at' => now(),
+                ]);
+            }
+        }
+
+        // In Progress → Completed
+        if ($this->status === 'in_progress') {
+
+            $teamMembers = $this->team->users()->count();
+            $attendanceCount = $this->attendances()->count();
+
+            $vehicleCount = $this->team->vehicles()->count();
+            $itemsCount = $this->items()->count();
+
+            if ($attendanceCount == $teamMembers && $itemsCount == $vehicleCount) {
+                $this->update([
+                    'status' => 'completed',
+                    'completed_at' => now(),
+                ]);
+            }
+        }
+    }
+
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BorrowRequest;
 use App\Models\CheckItem;
+use App\Models\Check;
+use App\Models\Vehicle;
+use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;
 
 class CheckingController extends Controller
@@ -14,8 +17,11 @@ class CheckingController extends Controller
      */
     public function index()
     {
-        $checks = CheckItem::latest()->get();
-        return view('checking.index', compact('checks'));
+        $checkings = Check::with('team')
+            ->orderBy('scheduled_date', 'desc')
+            ->paginate(10);
+
+        return view('checkings.index', compact('checkings'));
     }
 
     /**
@@ -31,31 +37,36 @@ class CheckingController extends Controller
     /**
      * Simpan hasil pengecekan
      */
-    public function store(Request $request, $borrow_id)
+    public function store(Request $request)
     {
-        $request->validate([
-            'fuel_level'        => 'required|string',
-            'physical_condition'=> 'required|string',
-            'cleanliness'       => 'required|string',
-            'tire_condition'    => 'required|string',
-            'notes'             => 'nullable|string',
+        $user = auth()->user();
+
+        // Pastikan user punya tim
+        if (!$user || !$user->team_id) {
+            return back()->with('error', 'Anda belum tergabung dalam tim.');
+        }
+
+        // Simpan pengecekan & ambil object-nya
+        $check = Check::create([
+            'scheduled_date' => now()->toDateString(),
+            'team_id'        => $user->team_id,
+            'status'         => 'pending',
+            'started_at'     => null,
+            'completed_at'   => null,
         ]);
 
-        CheckItem::create([
-            'borrow_request_id' => $borrow_id,
-            'checked_by'        => Auth::id(),
-            'fuel_level'        => $request->fuel_level,
-            'physical_condition'=> $request->physical_condition,
-            'cleanliness'       => $request->cleanliness,
-            'tire_condition'    => $request->tire_condition,
-            'notes'             => $request->notes
-        ]);
+        // Ambil kendaraan yang AVAILABLE saat pengecekan dibuat
+        $availableVehicles = Vehicle::where('status', 'available')->get();
 
-        // Update status kendaraan tersedia kembali
-        $borrow = BorrowRequest::find($borrow_id);
-        $borrow->vehicle->update(['status' => 'Tersedia']);
+        foreach ($availableVehicles as $v) {
+            CheckItem::create([
+                'check_id'   => $check->id,
+                'vehicle_id' => $v->id,
+            ]);
+        }
 
-        return redirect()->route('checking.index')->with('success', 'Pengecekan selesai.');
+        return redirect()->route('checkings.index')
+            ->with('success', 'Pengecekan berhasil dibuat.');
     }
 
     /**
@@ -63,7 +74,50 @@ class CheckingController extends Controller
      */
     public function show($id)
     {
-        $check = CheckItem::findOrFail($id);
-        return view('checking.show', compact('check'));
+        // Ambil data pengecekan
+        $check = Check::findOrFail($id);
+
+        // Ambil absensi pengecekan
+        $attendance = Attendance::where('check_id', $id)->get();
+
+        // Ambil semua kendaraan
+        $vehicles = Vehicle::all();
+
+        // Ambil check items yang sudah dibuat untuk pengecekan ini
+        $checkItems = CheckItem::where('check_id', $id)->get()->keyBy('vehicle_id');
+
+        return view('checkings.show', compact(
+            'check',
+            'attendance',
+            'vehicles',
+            'checkItems'
+        ));
     }
+
+    public function destroy($id)
+    {
+        $check = Check::findOrFail($id);
+
+        // Hanya pengecekan pending yang boleh dihapus
+        if ($check->status !== 'pending') {
+            return back()->with('error', 'Pengecekan yang sudah berlangsung atau selesai tidak dapat dihapus.');
+        }
+
+        // Hapus seluruh check_items jika ada
+        foreach (($check->items ?? collect([])) as $item) {
+            $item->delete();
+        }
+
+        // Hapus seluruh attendance jika ada
+        foreach (($check->attendances ?? collect([])) as $att) {
+            $att->delete();
+        }
+
+        // Hapus record pengecekannya
+        $check->delete();
+
+        return back()->with('success', 'Pengecekan berhasil dihapus.');
+    }
+
+
 }
