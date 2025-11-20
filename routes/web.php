@@ -13,143 +13,227 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\UseReportController;
+use App\Http\Controllers\OilChangeController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BorrowReportController;
+use App\Http\Controllers\NotificationController;
 
 
-// =======================================
-// ✅ GUEST (belum login)
-// =======================================
+// ======================================================
+// ⭕ GUEST (BELUM LOGIN)
+// ======================================================
 Route::middleware('guest')->group(function () {
+    Route::get('/', fn() => redirect()->route('login'));
     Route::get('/login', [LoginController::class, 'login'])->name('login');
     Route::post('/login', [LoginController::class, 'storelogin'])->name('login.process');
-    Route::get('/', fn() => redirect()->route('login'));
 });
 
 
-// =======================================
-// ✅ AUTH (sudah login)
-// =======================================
+// ======================================================
+// ⭕ AUTH (SUDAH LOGIN)
+// ======================================================
 Route::middleware('auth')->group(function () {
 
-    // Logout
+    // LOGOUT
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Redirect dashboard berdasarkan role
+    // REDIRECT DASHBOARD BERDASARKAN ROLE
     Route::get('/home', function () {
         return match (strtolower(Auth::user()->role)) {
-            'admin'     => redirect()->route('admin.dashboard'),
-            'pegawai'   => redirect()->route('pegawai.dashboard'),
-            'sumda'     => redirect()->route('sumda.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'kepala sumber daya' => redirect()->route('kepalasumberdaya.dashboard'),
             'ketua tim' => redirect()->route('ketuatim.dashboard'),
-            default     => redirect()->route('logout'),
+            'pegawai' => redirect()->route('pegawai.dashboard'),
+            default => redirect()->route('logout'),
         };
     })->name('home');
 
-    // =======================================
-    // ✅ DASHBOARD KHUSUS PER ROLE
-    // =======================================
-    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
-        ->name('admin.dashboard')->middleware('userAccess:admin');
 
-    Route::get('/sumda/dashboard', [DashboardController::class, 'sumda'])
-        ->name('sumda.dashboard')->middleware('userAccess:sumda');
-
-    Route::get('/ketuatim/dashboard', [DashboardController::class, 'ketuatim'])
-        ->name('ketuatim.dashboard')->middleware('userAccess:ketua tim');
-
-    Route::get('/pegawai/dashboard', [DashboardController::class, 'pegawai'])
-        ->name('pegawai.dashboard')->middleware('userAccess:pegawai');
+    // ======================================================
+    // ⭕ DASHBOARD PER ROLE
+    // ======================================================
+    Route::middleware(['userAccess:admin'])->get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+    Route::middleware(['userAccess:kepala sumber daya'])->get('/kepalasumberdaya/dashboard', [DashboardController::class, 'kepalasumberdaya'])->name('kepalasumberdaya.dashboard');
+    Route::middleware(['userAccess:ketua tim'])->get('/ketuatim/dashboard', [DashboardController::class, 'ketuatim'])->name('ketuatim.dashboard');
+    Route::middleware(['userAccess:pegawai'])->get('/pegawai/dashboard', [DashboardController::class, 'pegawai'])->name('pegawai.dashboard');
 
 
-    // =======================================
-    // ✅ ROUTE UTAMA (TIDAK BERDASARKAN ROLE)
-    // =======================================
+    // ======================================================
+    // ⭕ USERS (HANYA ADMIN)
+    // ======================================================
+    Route::resource('/users', UserController::class)->middleware(['userAccess:admin']);
 
-    // Users → Admin Only
-    Route::resource('/users', UserController::class)
-        ->middleware('userAccess:admin');
 
-    // Teams → Admin Only
-    Route::resource('/teams', TeamController::class)
-        ->middleware('userAccess:admin');
+    // ======================================================
+    // ⭕ PROFILE (semua role bisa edit profil sendiri)
+    // ======================================================
+    Route::get('/profil', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profil/update', [ProfileController::class, 'update'])->name('profile.update');
 
-    // Vehicles → Admin, Sumda, Pegawai
-    Route::resource('/vehicles', VehicleController::class)
-        ->middleware('userAccess:admin,sumda,pegawai');
 
-    // Borrowings
-    Route::resource('/borrowings', BorrowingController::class)
-        ->middleware('userAccess:admin,sumda,pegawai');
+    // ======================================================
+    // ⭕ TEAMS
+    // Admin + Kepala Sumber Daya → full access
+    // Ketua Tim + Pegawai → hanya index + show
+    // ======================================================
+    Route::middleware(['userAccess:admin,kepala sumber daya'])->group(function () {
 
-    // Checkings → Admin Only
-    Route::resource('/checkings', CheckingController::class)
-        ->middleware('userAccess:admin');
+        // PERHATIKAN: route spesifik dulu
+        Route::get('/teams/create', [TeamController::class, 'create'])->name('teams.create');
+        Route::get('/teams/manage', [TeamController::class, 'manage'])->name('teams.manage');
+        Route::post('/teams/manage/save', [TeamController::class, 'saveManage'])->name('teams.manage.save');
 
-    // Check Item → Ketua Tim
-    Route::resource('/checkitem', CheckItemController::class)
-        ->middleware('userAccess:ketua tim');
-
-    // Reports → Admin + Pegawai
-    Route::get('/reports', [UseReportController::class, 'index'])
-        ->name('reports.index')
-        ->middleware('userAccess:admin,pegawai');
-    // Reports (UseReport)
-    Route::prefix('reports')->middleware('userAccess:admin,pegawai')->group(function () {
-        Route::get('/', [UseReportController::class, 'index'])->name('reports.index');
-        Route::get('/create/{borrow_id}', [UseReportController::class, 'create'])->name('reports.create');
-        Route::post('/store/{borrow_id}', [UseReportController::class, 'store'])->name('reports.store');
-        Route::get('/{id}', [UseReportController::class, 'show'])->name('reports.show');
+        // Resource actions
+        Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
+        Route::get('/teams/{id}/edit', [TeamController::class, 'edit'])->name('teams.edit');
+        Route::put('/teams/{id}', [TeamController::class, 'update'])->name('teams.update');
+        Route::delete('/teams/{id}', [TeamController::class, 'destroy'])->name('teams.destroy');
     });
+    Route::get('/teams', [TeamController::class, 'index'])
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])
+        ->name('teams.index');
+
+    Route::get('/teams/{id}', [TeamController::class, 'show'])
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])
+        ->name('teams.show');
+
+
+    // ======================================================
+    // ⭕ VEHICLES
+    // ======================================================
+    Route::middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])->group(function () {
+        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->name('vehicles.show');
+        Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
+    });
+
+    Route::middleware(['userAccess:admin,kepala sumber daya'])->group(function () {
+        Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create');
+        Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
+        Route::get('/vehicles/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicles.edit');
+        Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+    });
+
+    Route::post('/vehicles/{id}/oil-change', [OilChangeController::class, 'store'])
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])
+        ->name('oilchange.store');
+
+
+    // ======================================================
+    // ⭕ BORROWINGS
+    // ======================================================
+    Route::resource('/borrowings', BorrowingController::class)
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai']);
+
     Route::patch('/borrowings/{id}/cancel', [BorrowingController::class, 'cancel'])
-    ->name('borrowings.cancel');
+        ->name('borrowings.cancel');
+
     Route::post('/borrowings/{id}/approve', [BorrowingController::class, 'approve'])
-    ->name('borrowings.approve');
+        ->middleware(['userAccess:admin,kepala sumber daya'])
+        ->name('borrowings.approve');
+
     Route::post('/borrowings/{id}/reject', [BorrowingController::class, 'reject'])
+        ->middleware(['userAccess:admin,kepala sumber daya'])
         ->name('borrowings.reject');
-    // =======================================
-    // ✅ USE REPORTS (Laporan Penggunaan Kendaraan)
-    // =======================================
-    Route::get('/usereports', [UseReportController::class, 'index'])
-        ->name('usereports.index');
-
-    Route::get('/usereports/create/{borrow_id}', [UseReportController::class, 'create'])
-        ->name('usereports.create');
-
-    Route::post('/usereports/store/{borrow_id}', [UseReportController::class, 'store'])
-        ->name('usereports.store');
-
-    Route::get('/usereports/{id}/edit', [UseReportController::class, 'edit'])
-        ->name('usereports.edit');
-    Route::put('/usereports/{id}', [UseReportController::class, 'update'])
-        ->name('usereports.update');
-    Route::get('/usereports/{id}', [UseReportController::class, 'show'])
-        ->name('usereports.show');
-
-    // CHECKINGS
-    Route::get('/checkings', [CheckingController::class, 'index'])->name('checkings.index');
-    Route::get('/checkings/create', [CheckingController::class, 'create'])->name('checkings.create');
-    Route::post('/checkings', [CheckingController::class, 'store'])->name('checkings.store');
-
-    Route::get('/checkings/{id}', [CheckingController::class, 'show'])->name('checkings.show');
-    Route::get('/checkings/{id}/edit', [CheckingController::class, 'edit'])->name('checkings.edit');
-    Route::put('/checkings/{id}', [CheckingController::class, 'update'])->name('checkings.update');
-    Route::delete('/checkings/{id}', [CheckingController::class, 'destroy'])->name('checkings.destroy');
 
 
-    // CHECK ITEMS (Item pengecekan kendaraan)
-    Route::get('/checkitems/{check_id}/{vehicle_id}/create', [CheckItemController::class, 'create'])->name('checkitems.create');
-    Route::post('/checkitems/{check_id}/{vehicle_id}', [CheckItemController::class, 'store'])->name('checkitems.store');
-
-    Route::get('/checkitems/{id}', [CheckItemController::class, 'show'])->name('checkitems.show');
-    Route::get('/checkitems/{id}/edit', [CheckItemController::class, 'edit'])->name('checkitems.edit');
-    Route::put('/checkitems/{id}', [CheckItemController::class, 'update'])->name('checkitems.update');
-
-    // ATTENDANCES
-    Route::get('/attendances/{check_id}/create', [AttendanceController::class, 'create'])->name('attendances.create');
-    Route::post('/attendances/{check_id}', [AttendanceController::class, 'store'])->name('attendances.store');
-
-    Route::get('/attendances/{id}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
-    Route::put('/attendances/{id}', [AttendanceController::class, 'update'])->name('attendances.update');
+    // ======================================================
+    // ⭕ USE REPORTS
+    // ======================================================
+    Route::prefix('usereports')->group(function () {
+        Route::get('/', [UseReportController::class, 'index'])->name('usereports.index');
+        Route::get('/create/{borrow_id}', [UseReportController::class, 'create'])->name('usereports.create');
+        Route::post('/store/{borrow_id}', [UseReportController::class, 'store'])->name('usereports.store');
+        Route::get('/{id}/edit', [UseReportController::class, 'edit'])->name('usereports.edit');
+        Route::put('/{id}', [UseReportController::class, 'update'])->name('usereports.update');
+        Route::get('/{id}', [UseReportController::class, 'show'])->name('usereports.show');
+    });
 
 
+    // ======================================================
+    // ⭕ BORROW REPORTS (PDF, Excel, CSV, JSON)
+    // ======================================================
+    Route::get('/reports/borrow', [BorrowReportController::class, 'form'])
+        ->name('reports.borrow.form');
 
+    Route::post('/reports/borrow/generate', [BorrowReportController::class, 'generate'])
+        ->name('reports.borrow.generate');
+
+
+    // ======================================================
+    // ⭕ CHECKINGS
+    // ======================================================
+    Route::middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])->group(function () {
+        Route::get('/checkings', [CheckingController::class, 'index'])->name('checkings.index');
+        Route::get('/checkings/{checking}', [CheckingController::class, 'show'])->name('checkings.show');
+        Route::get('/checkings/create', [CheckingController::class, 'create'])
+            ->middleware('userAccess:ketua tim')
+            ->name('checkings.create');
+        Route::post('/checkings', [CheckingController::class, 'store'])
+            ->middleware('userAccess:ketua tim')
+            ->name('checkings.store');
+        Route::get('/checkings/{checking}/edit', [CheckingController::class, 'edit'])
+            ->middleware('userAccess:pegawai,ketua tim')
+            ->name('checkings.edit');
+        Route::put('/checkings/{checking}', [CheckingController::class, 'update'])
+            ->middleware('userAccess:pegawai,ketua tim')
+            ->name('checkings.update');
+        Route::delete('/checkings/{checking}', [CheckingController::class, 'destroy'])
+            ->middleware('userAccess:ketua tim')
+            ->name('checkings.destroy');
+    });
+
+
+    // ======================================================
+    // ⭕ CHECK ITEM
+    // ======================================================
+    Route::middleware(['userAccess:pegawai,ketua tim,admin,kepala sumber daya'])->group(function () {
+        Route::get('/checkitems/{checkitem}', [CheckItemController::class, 'show'])->name('checkitems.show');
+        Route::get('/checkitems', [CheckItemController::class, 'edit'])
+            ->middleware('userAccess:pegawai,ketua tim')
+            ->name('checkitems.edit');
+        Route::get('/checkitems', [CheckItemController::class, 'update'])
+            ->middleware('userAccess:pegawai,ketua tim')
+            ->name('checkitems.update');
+        Route::get('/checkitems', [CheckItemController::class, 'destroy'])
+            ->middleware('userAccess:pegawai,ketua tim')
+            ->name('checkitems.destroy');
+    });
+
+
+    // ======================================================
+    // ⭕ ATTENDANCES
+    // ======================================================
+    Route::middleware(['userAccess:ketua tim'])->group(function () {
+        Route::get('/attendances/{attendance}', [AttendanceController::class, 'create'])->name('attendances.create');
+        Route::get('/attendances/{attendance}', [AttendanceController::class, 'store'])->name('attendances.store');
+        Route::get('/attendances/{attendance}', [AttendanceController::class, 'edit'])->name('attendances.edit');
+        Route::get('/attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
+    });
+
+
+    // ======================================================
+    // ⭕ SCHEDULES
+    // ======================================================
+    Route::middleware(['userAccess:admin,kepala sumber daya'])->group(function () {
+        Route::post('/schedules/generate', [ScheduleController::class, 'generate'])->name('schedules.generate');
+    });
+
+    Route::get('/schedules', [ScheduleController::class, 'index'])
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])
+        ->name('schedules.index');
+
+    Route::get('/schedules/today', [ScheduleController::class, 'today'])
+        ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])
+        ->name('schedules.today');
+
+    // ======================================================
+    // ⭕ NOTIFICATIONS
+    // ======================================================
+    Route::get('/notifications/read/{id}', [NotificationController::class, 'markRead'])
+    ->name('notifications.read');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAll'])
+        ->name('notifications.read-all');
 });

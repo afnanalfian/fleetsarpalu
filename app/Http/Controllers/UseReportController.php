@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BorrowRequest;
 use App\Models\UseReport;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class UseReportController extends Controller
@@ -73,6 +74,16 @@ class UseReportController extends Controller
                 'fuel_percent' => $request->fuel_after,
                 'status' => 'available',
             ]);
+        }
+        $sumdas = User::where('role', 'Kepala Sumber Daya')->get();
+
+        foreach ($sumdas as $sd) {
+            notify(
+                $sd->id,
+                "Peminjaman Selesai",
+                "Mobil {$borrow->vehicle->name} telah selesai dipinjam.",
+                route('borrowings.show', $borrow->id)
+            );
         }
 
 

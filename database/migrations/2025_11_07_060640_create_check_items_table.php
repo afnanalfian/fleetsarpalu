@@ -49,7 +49,7 @@ return new class extends Migration {
             $table->boolean('start_engine_ok')->nullable();
             $table->string('start_engine_note')->nullable();
 
-            $table->boolean('glass_celanliness_ok')->nullable();
+            $table->boolean('glass_cleanliness_ok')->nullable();
             $table->string('glass_cleanliness_note')->nullable();
 
             $table->boolean('body_cleanliness_ok')->nullable();

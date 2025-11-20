@@ -65,6 +65,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Team::class, 'leader_id');
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
 
     /* =======================
        ⚙️ HELPER DAN ROLE
@@ -75,7 +79,7 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->role === 'Admin';
     }
 
     /**
@@ -83,7 +87,7 @@ class User extends Authenticatable
      */
     public function isSumda()
     {
-        return $this->role === 'sumda';
+        return $this->role === 'Kepala Sumber Daya';
     }
 
     /**
@@ -91,7 +95,7 @@ class User extends Authenticatable
      */
     public function isKetuaTim()
     {
-        return $this->role === 'ketua_tim';
+        return $this->role === 'Ketua Tim';
     }
 
     /**
@@ -99,7 +103,7 @@ class User extends Authenticatable
      */
     public function isPegawai()
     {
-        return $this->role === 'pegawai';
+        return $this->role === 'Pegawai';
     }
 
     /**
@@ -108,10 +112,10 @@ class User extends Authenticatable
     public function getRoleLabelAttribute()
     {
         return match ($this->role) {
-            'admin' => 'Administrator',
-            'sumda' => 'Pimpinan Sumber Daya',
-            'ketua_tim' => 'Ketua Tim',
-            'pegawai' => 'Pegawai',
+            'Admin' => 'Administrator',
+            'Kepala Sumber Daya' => 'Pimpinan Sumber Daya',
+            'Ketua Tim' => 'Ketua Tim',
+            'Pegawai' => 'Pegawai',
             default => ucfirst($this->role),
         };
     }
@@ -122,5 +126,20 @@ class User extends Authenticatable
     public function getTeamNameAttribute()
     {
         return $this->team ? $this->team->name : '-';
+    }
+    public function hasRole($roles)
+    {
+        $roles = is_array($roles) ? $roles : explode(',', $roles);
+        return in_array(strtolower($this->role), array_map('strtolower', $roles));
+    }
+    public function isSameTeam($teamId)
+    {
+        // Jika admin atau kepala sumber daya → boleh semua
+        if (in_array(strtolower($this->role), ['admin', 'kepala sumber daya'])) {
+            return true;
+        }
+
+        // Selain itu (pegawai & ketua tim) → hanya tim sendiri
+        return $this->team_id == $teamId;
     }
 }

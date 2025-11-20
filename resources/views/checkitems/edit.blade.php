@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Hasil Cek Kendaraan')
+@section('title', 'Edit Pengecekan Kendaraan')
 
 @section('content')
 <div class="container-fluid pt-4 px-4">
@@ -18,6 +18,7 @@
 
                 {{-- Header Kendaraan --}}
                 <div class="border p-3 rounded bg-white mb-4 d-flex gap-3">
+
                     <img src="{{ $vehicle->photo_path ? asset('storage/'.$vehicle->photo_path) : asset('img/no-image.png') }}"
                          class="rounded"
                          style="width: 140px; height: 100px; object-fit: cover">
@@ -25,97 +26,153 @@
                     <div>
                         <h5 class="fw-bold mb-1">{{ $vehicle->name }}</h5>
                         <p class="mb-0"><strong>Plat:</strong> {{ $vehicle->plat_nomor }}</p>
+                        <p class="mb-0"><strong>Status:</strong>
+                            <span class="badge
+                                @if($vehicle->status=='available') bg-success
+                                @elseif($vehicle->status=='is_use') bg-primary
+                                @else bg-danger @endif">
+                                {{ strtoupper($vehicle->status) }}
+                            </span>
+                        </p>
                     </div>
                 </div>
 
                 {{-- FORM EDIT --}}
-                <form action="{{ route('checkitems.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="row g-3">
+                <form action="{{ route('checkitems.update', $item->id) }}"
+                      method="POST" enctype="multipart/form-data" class="row g-3">
+
                     @csrf
                     @method('PUT')
 
                     {{-- Fuel & KM --}}
                     <div class="col-md-6">
-                        <label class="form-label text-start w-100">Persentase BBM (%)</label>
-                        <input type="number" name="fuel_percent" class="form-control"
-                            value="{{ old('fuel_percent', $item->fuel_percent) }}" required>
+                        <label class="form-label w-100">Persentase BBM (%) <span class="text-danger">*</span></label>
+
+                        <input  type="number"
+                                name="fuel_percent"
+                                class="form-control @error('fuel_percent') is-invalid @enderror"
+                                value="{{ old('fuel_percent', $item->fuel_percent) }}"
+                                min="0" max="100"
+                                required>
+
+                        {{-- Pesan error dari backend --}}
+                        @error('fuel_percent')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                        {{-- Pesan error dari frontend --}}
+                        <div class="invalid-feedback" id="fuelPercentError">
+                            Persentase BBM harus antara 0 hingga 100.
+                        </div>
                     </div>
 
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const input = document.querySelector('input[name="fuel_percent"]');
+
+                        input.addEventListener('input', function () {
+                            if (this.value < 0 || this.value > 100) {
+                                this.classList.add('is-invalid');
+                            } else {
+                                this.classList.remove('is-invalid');
+                            }
+                        });
+                    });
+                    </script>
+
                     <div class="col-md-6">
-                        <label class="form-label text-start w-100">Kilometer</label>
-                        <input type="number" name="km" class="form-control"
-                            value="{{ old('km', $item->km) }}" required>
+                        <label class="form-label w-100">Kilometer <span class="text-danger">*</span></label>
+                        <input type="number" name="km"
+                               class="form-control"
+                               value="{{ old('km', $item->km) }}"
+                               required>
                     </div>
 
                     {{-- Checklist --}}
                     <div class="col-12 mt-3">
-                        <h5 class="fw-bold text-start">Checklist Kendaraan</h5>
+                        <h5 class="fw-bold">Checklist Kendaraan</h5>
                     </div>
 
                     @foreach($items as $key => $label)
+
+                        @php
+                            $okField = $key . '_ok';
+                            $noteField = $key . '_note';
+                        @endphp
+
                         <div class="col-md-12">
-                            <label class="form-label w-100 fw-bold text-uppercase">
-                                {{ $label }} <span class="text-danger">*</span>
-                            </label>
+                            <label class="form-label w-100 fw-bold text-uppercase">{{ $label }} <span class="text-danger">*</span></label>
 
                             <div class="d-flex flex-wrap align-items-center gap-3">
+
                                 {{-- Aman --}}
                                 <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           name="{{ $key }}_ok"
+                                    <input class="form-check-input" type="radio"
+                                           name="{{ $okField }}"
                                            value="1"
-                                           {{ $item->{$key.'_ok'} == 1 ? 'checked' : '' }}>
-                                    <label class="form-check-label text-success fw-semibold">Aman</label>
+                                           id="{{ $key }}_ok1"
+                                           {{ old($okField, $item->$okField) == 1 ? 'checked' : '' }}
+                                           required>
+                                    <label class="form-check-label text-success fw-semibold" for="{{ $key }}_ok1">
+                                        Aman
+                                    </label>
                                 </div>
 
                                 {{-- Tidak Aman --}}
                                 <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           name="{{ $key }}_ok"
+                                    <input class="form-check-input" type="radio"
+                                           name="{{ $okField }}"
                                            value="0"
-                                           {{ $item->{$key.'_ok'} == 0 ? 'checked' : '' }}>
-                                    <label class="form-check-label text-danger fw-semibold">Tidak Aman</label>
+                                           id="{{ $key }}_ok0"
+                                           {{ old($okField, $item->$okField) == 0 ? 'checked' : '' }}>
+                                    <label class="form-check-label text-danger fw-semibold" for="{{ $key }}_ok0">
+                                        Tidak Aman
+                                    </label>
                                 </div>
 
-                                {{-- Note --}}
+                                {{-- Catatan --}}
                                 <div class="flex-grow-1">
                                     <input type="text"
                                            class="form-control"
-                                           name="{{ $key }}_note"
-                                           value="{{ $item->{$key.'_note'} }}"
+                                           name="{{ $noteField }}"
+                                           value="{{ old($noteField, $item->$noteField) }}"
                                            placeholder="Catatan (opsional)">
                                 </div>
                             </div>
                         </div>
-                    @endforeach
 
-                    {{-- Foto Baru --}}
-                    <div class="col-12 mt-3">
-                        <label class="form-label fw-bold">Tambahkan Foto Baru</label>
-                        <input type="file" name="photos[]" class="form-control" accept="image/*" multiple>
-                    </div>
+                    @endforeach
 
                     {{-- Foto Lama --}}
                     @if($item->photos)
-                        <div class="col-12 mt-3">
-                            <label class="form-label fw-bold">Foto Sebelumnya</label><br>
-                            @foreach(json_decode($item->photos, true) as $p)
-                                <img src="{{ asset('storage/'.$p) }}"
-                                     class="rounded border me-2 mb-2"
-                                     style="width: 120px; height: 100px; object-fit: cover;">
-                            @endforeach
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Foto Sebelumnya:</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach(json_decode($item->photos, true) as $photo)
+                                    <img src="{{ asset('storage/'.$photo) }}"
+                                         style="width:120px; height:90px; object-fit:cover;"
+                                         class="rounded border">
+                                @endforeach
+                            </div>
                         </div>
                     @endif
 
-                    <div class="col-12 mt-4 text-start">
-                        <button class="btn btn-success">Update Hasil Cek</button>
+                    {{-- Upload Foto Baru --}}
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Tambah Foto Baru (opsional)</label>
+                        <input type="file" name="photos[]" class="form-control" accept="image/*" multiple>
                     </div>
+
+                    <div class="col-12 mt-3 text-start">
+                        <button class="btn btn-primary">SIMPAN HASIL CEK</button>
+                    </div>
+
                 </form>
 
             </div>
         </div>
     </div>
-
 </div>
 @endsection

@@ -107,14 +107,19 @@
                         <input type="text" name="lokasi" class="form-control" value="{{ old('lokasi') }}">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Jarak Tempuh (km)</label>
                         <input type="number" name="distance" class="form-control" value="{{ old('distance') }}">
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">KM Terakhir Ganti Oli</label>
+                    <div class="col-md-4">
+                        <label class="form-label">KM Terakhir Ganti Oli (km)</label>
                         <input type="number" name="last_km_for_oil" class="form-control" value="{{ old('last_km_for_oil') }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Interval Ganti Oli (km)</label>
+                        <input type="number" name="oil_change_interval" class="form-control" value="{{ old('oil_change_interval') }}">
                     </div>
 
                     <div class="col-md-6">

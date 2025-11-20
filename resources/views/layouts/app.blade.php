@@ -30,7 +30,8 @@
 
 </div>
 
-<script src="{{ asset('js/dashboard.js') }}"></script>
+{{-- <script src="{{ asset('js/dashboard.js') }}"></script> --}}
+{{-- Jangan load dashboard.js di halaman manage team --}}
 <script src="https://kit.fontawesome.com/e814145206.js" crossorigin="anonymous"></script>
 </body>
 </html>

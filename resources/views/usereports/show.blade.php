@@ -148,10 +148,15 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="text-start">
-                    <a href="{{ route('usereports.edit', $report->id) }}" class="btn btn-success me-2">
-                        <i class="fa-solid fa-pen me-1"></i> Edit Laporan
-                    </a>
+
+                    @if(auth()->id() === $report->borrowRequest->user_id)
+                        <a href="{{ route('usereports.edit', $report->id) }}" class="btn btn-success me-2">
+                            <i class="fa-solid fa-pen me-1"></i> Edit Laporan
+                        </a>
+                    @endif
+
                 </div>
+
 
             </div>
         </div>

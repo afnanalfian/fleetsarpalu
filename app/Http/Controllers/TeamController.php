@@ -174,4 +174,45 @@ class TeamController extends Controller
         $team = Team::with(['leader', 'members'])->findOrFail($id);
         return view('teams.show', compact('team'));
     }
+
+    public function manage()
+    {
+        $teams = Team::with(['leader', 'members'])->get();
+        $users = User::orderBy('name')->get();
+
+        return view('teams.manage', compact('teams', 'users'));
+    }
+
+    public function saveManage(Request $request)
+    {
+        $data = json_decode($request->payload, true);
+
+        foreach ($data as $teamId => $values) {
+
+            $leaderId = $values['leader'];
+            $memberIds = $values['members'];
+
+            // 1) Update leader
+            if ($leaderId) {
+                User::where('id', $leaderId)->update([
+                    'team_id' => $teamId,
+                    'role' => 'Ketua Tim'
+                ]);
+            }
+
+            // 2) Ketua lama yg tergeser otomatis jadi pegawai
+            Team::where('id', $teamId)
+                ->update(['leader_id' => $leaderId]);
+
+            // 3) Update anggota
+            User::whereIn('id', $memberIds)->update([
+                'team_id' => $teamId,
+                'role' => 'Pegawai'
+            ]);
+        }
+
+        return redirect()->route('teams.index')
+            ->with('success', 'Pengaturan tim berhasil diperbarui.');
+    }
+
 }

@@ -5,14 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Check;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
-    public function index()
-    {
-        $data = Attendance::with(['user', 'check'])->get();
-        return view('attendance.index', compact('data'));
-    }
 
     public function create($check_id)
     {
@@ -72,6 +68,67 @@ class AttendanceController extends Controller
             ->with('success', 'Absensi pengecekan berhasil disimpan.');
     }
 
+    public function edit($check_id)
+    {
+        $checking = Check::with(['team.users', 'attendances'])->findOrFail($check_id);
 
+        // Ambil attendance lama dan mapping per user
+        $attendanceMap = $checking->attendances->keyBy('user_id');
+
+        return view('attendances.edit', [
+            'checking' => $checking,
+            'members' => $checking->team->users,
+            'attendanceMap' => $attendanceMap
+        ]);
+    }
+
+    public function update(Request $request, $check_id)
+    {
+        $checking = Check::with(['team.users', 'attendances'])->findOrFail($check_id);
+
+        foreach ($checking->team->users as $member) {
+
+            $presentField = "present_{$member->id}";
+            $reasonField  = "reason_{$member->id}";
+            $buktiField   = "bukti_{$member->id}";
+
+            $present = $request->input($presentField) == 1;
+            $reason  = $present ? null : $request->input($reasonField);
+
+            $attendance = $checking->attendances->firstWhere('user_id', $member->id);
+
+            // Jika belum ada record (tidak mungkin, tapi jaga-jaga)
+            if (!$attendance) {
+                $attendance = Attendance::create([
+                    'check_id' => $check_id,
+                    'user_id' => $member->id,
+                ]);
+            }
+
+            // Upload bukti baru
+            $buktiPath = $attendance->bukti_path;
+
+            if ($request->hasFile($buktiField)) {
+
+                // Hapus file lama jika ada
+                if ($buktiPath && Storage::disk('public')->exists($buktiPath)) {
+                    Storage::disk('public')->delete($buktiPath);
+                }
+
+                $buktiPath = $request->file($buktiField)
+                                    ->store('attendance_bukti', 'public');
+            }
+
+            // Update attendance
+            $attendance->update([
+                'present'    => $present,
+                'reason'     => $reason,
+                'bukti_path' => $buktiPath,
+            ]);
+        }
+
+        return redirect()->route('checkings.show', $check_id)
+            ->with('success', 'Absensi berhasil diperbarui.');
+    }
 
 }

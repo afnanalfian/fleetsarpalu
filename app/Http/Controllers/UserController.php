@@ -49,7 +49,7 @@ class UserController extends Controller
             'name' => 'required|max:50',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|max:15',
-            'role' => 'required|in:pegawai,ketua_tim,admin,sumda', // dari form
+            'role' => 'required|in:Pegawai,Ketua Tim, Admin, Kepala Sumber Daya', // dari form
             'team_id' => 'nullable|exists:teams,id',
 
 
@@ -109,7 +109,7 @@ class UserController extends Controller
             'name' => 'required|max:50',
             'email' => 'required|email|unique:users,email,' . $id,
             'phone' => 'nullable|max:15',
-            'role' => 'required|in:pegawai,ketua_tim,admin,sumda',
+            'role' => 'required|in:Pegawai,Ketua Tim, Admin, Kepala Sumber Daya',
             'team_id' => 'nullable|exists:teams,id',
         ];
 

@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->string('NIP')->unique()->nullable();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->enum('role', ['Admin', 'Sumda', 'Ketua Tim', 'Pegawai']);
+            $table->enum('role', ['Admin', 'Kepala Sumber Daya', 'Ketua Tim', 'Pegawai']);
             $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null');
             $table->string('password');
             $table->timestamps();

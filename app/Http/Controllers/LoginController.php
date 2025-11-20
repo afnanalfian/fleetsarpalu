@@ -44,9 +44,9 @@ class LoginController extends Controller
                     flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
                     return redirect()->route('pegawai.dashboard');
 
-                case 'Sumda':
+                case 'Kepala Sumber Daya':
                     flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');
-                    return redirect()->route('sumda.dashboard');
+                    return redirect()->route('kepalasumberdaya.dashboard');
 
                 case 'Ketua Tim':
                     flash()->addSuccess('<b>Berhasil!</b><br>Proses login berhasil.');

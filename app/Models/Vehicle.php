@@ -25,6 +25,7 @@ class Vehicle extends Model
         'warna',
         'status',
         'last_km_for_oil',
+        'oil_change_interval',
         'fuel_percent',
         'notes',
         'photo_path',

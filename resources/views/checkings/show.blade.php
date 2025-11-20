@@ -20,6 +20,14 @@
                 {{-- DETAIL PENGECEKAN --}}
                 <h4 class="fw-bold mb-3">Detail Pengecekan</h4>
 
+                <div class="mb-3">
+                    <a href="{{ asset('storage/sop/SOP_Pengecekan_Rutin.pdf') }}"
+                    class="btn btn-outline-primary btn-sm"
+                    target="_blank">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Lihat SOP Pengecekan Rutin
+                    </a>
+                </div>
+
                 <table class="table table-bordered">
                     <tr>
                         <th class="w-25">Tanggal</th>
@@ -65,12 +73,12 @@
                 {{-- Jika belum ada absensi --}}
                 @if($attendanceList->isEmpty())
                     <p class="text-danger fst-italic">Absensi belum dibuat.</p>
-
-                    <a href="{{ route('attendances.create', $check->id) }}"
-                    class="btn btn-primary btn-sm">
-                        <i class="fa-solid fa-user-check me-1"></i> Buat Absensi
-                    </a>
-
+                    @if(auth()->user()->role === 'Ketua Tim')
+                        <a href="{{ route('attendances.create', $check->id) }}"
+                        class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-user-check me-1"></i> Buat Absensi
+                        </a>
+                    @endif
                 @else
                     @php
                         $presentCount = $attendanceList->where('present', 1)->count();
@@ -117,11 +125,12 @@
                             @endforeach
                         </tbody>
                     </table>
-
-                    <a href="{{ route('attendances.edit', $check->id) }}"
-                    class="btn btn-warning btn-sm mt-2">
-                        <i class="fa-solid fa-pen-to-square me-1"></i> Edit Absensi
-                    </a>
+                    @if(auth()->user()->role === 'Ketua Tim')
+                        <a href="{{ route('attendances.edit', $check->id) }}"
+                        class="btn btn-warning btn-sm mt-2">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Absensi
+                        </a>
+                    @endif
                 @endif
 
 
@@ -166,7 +175,7 @@
                             {{-- Jika KENDARAAN ADA CHECKITEMNYA --}}
                             @else
                                 {{-- Jika sudah dicek --}}
-                                @if($item->fuel_percent !== null)
+                                @if($item && !is_null($item->fuel_percent))
                                     <p class="mb-1">Fuel: {{ $item->fuel_percent }}%</p>
                                     <p class="mb-1">KM: {{ $item->km }}</p>
 
@@ -181,19 +190,22 @@
 
                                     <div class="mt-2">
                                         <a href="{{ route('checkitems.show', $item->id) }}" class="btn btn-info btn-sm">Detail</a>
-                                        <a href="{{ route('checkitems.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        @if (in_array(strtolower(auth()->user()->role), ['pegawai', 'ketua tim']))
+                                            <a href="{{ route('checkitems.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        @endif
                                     </div>
 
                                 {{-- Belum dicek --}}
                                 @else
                                     <span class="badge bg-primary">Belum dicek</span>
-
-                                    <div class="mt-2">
-                                        <a href="{{ route('checkitems.create', [$check->id, $vehicle->id]) }}"
-                                        class="btn btn-primary btn-sm">
-                                            Lakukan Pengecekan
-                                        </a>
-                                    </div>
+                                    @if (in_array(strtolower(auth()->user()->role), ['pegawai', 'ketua tim']))
+                                        <div class="mt-2">
+                                            <a href="{{ route('checkitems.edit', $item->id) }}"
+                                            class="btn btn-primary btn-sm">
+                                                Lakukan Pengecekan
+                                            </a>
+                                        </div>
+                                    @endif
                                 @endif
                             @endif
 

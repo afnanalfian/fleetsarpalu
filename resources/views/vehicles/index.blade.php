@@ -11,11 +11,12 @@
         <a href="{{ route('borrowings.create') }}" class="btn btn-warning rounded">
             Pinjam Kendaraan <i class="fa-solid fa-key ms-1"></i>
         </a>
-
-        {{-- Tombol Tambah Kendaraan --}}
-        <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded">
-            Tambah Kendaraan <i class="fa-solid fa-car ms-1"></i>
-        </a>
+        @if (in_array(strtolower(auth()->user()->role), ['admin', 'kepala sumber daya']))
+            {{-- Tombol Tambah Kendaraan --}}
+            <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded">
+                Tambah Kendaraan <i class="fa-solid fa-car ms-1"></i>
+            </a>
+        @endif
 
     </div>
 
@@ -73,27 +74,45 @@
                         @endif
                     </li>
 
-                    {{-- Tombol Aksi --}}
-                    <li class="list-group-item d-flex gap-2">
+                    {{-- Aksi untuk ADMIN & KEPALA SUMBER DAYA --}}
+                    @if(in_array(strtolower(auth()->user()->role), ['admin', 'kepala sumber daya']))
+                        <li class="list-group-item d-flex gap-2">
 
-                        {{-- Detail --}}
-                        <a href="{{ route('vehicles.show', $vehicle->id) }}" class="btn btn-info w-33">
-                            Detail
-                        </a>
+                            {{-- Detail --}}
+                            <a href="{{ route('vehicles.show', $vehicle->id) }}"
+                            class="btn btn-info btn-sm">
+                                <i class="fa-solid fa-eye me-1"></i> Detail
+                            </a>
 
-                        {{-- Edit --}}
-                        <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-success w-33">
-                            Ubah
-                        </a>
+                            {{-- Edit --}}
+                            <a href="{{ route('vehicles.edit', $vehicle->id) }}"
+                            class="btn btn-success btn-sm">
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Ubah
+                            </a>
 
-                        {{-- Hapus --}}
-                        <button type="button" class="btn btn-danger w-33"
-                                data-bs-toggle="modal"
-                                data-bs-target="#Hapus{{ $vehicle->id }}">
-                            Hapus
-                        </button>
+                            {{-- Hapus --}}
+                            <button type="button"
+                                    class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#Hapus{{ $vehicle->id }}">
+                                <i class="fa-solid fa-trash me-1"></i> Hapus
+                            </button>
 
-                    </li>
+                        </li>
+                    @endif
+
+
+                    {{-- Aksi untuk KETUA TIM & PEGAWAI --}}
+                    @if(in_array(strtolower(auth()->user()->role), ['ketua tim', 'pegawai']))
+
+                            {{-- Detail --}}
+                            <a href="{{ route('vehicles.show', $vehicle->id) }}"
+                            class="btn btn-info btn-sm">
+                                <i class="fa-solid fa-eye me-1"></i> Detail
+                            </a>
+                    @endif
+
+
                 </ul>
             </div>
         </div>

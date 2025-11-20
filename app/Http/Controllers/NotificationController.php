@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -19,5 +20,25 @@ class NotificationController extends Controller
     {
         // placeholder — nanti bisa diganti broadcast/email
         return back()->with('success', 'Notifikasi terkirim (dummy).');
+    }
+    public function markRead($id)
+    {
+        $notif = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $notif->update(['is_read' => 1]);
+
+        // Redirect ke URL tujuan
+        return redirect($notif->url ?? '/');
+    }
+
+    public function markAll()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', 0)
+            ->update(['is_read' => 1]);
+
+        return back();
     }
 }

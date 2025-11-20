@@ -6,11 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "^4.3",
         "icehouse-ventures/laravel-chartjs": "^1.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "php-flasher/flasher-laravel": "^2.0",
         "php-flasher/flasher-noty-laravel": "^2.0"
     },
@@ -28,7 +30,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+                "app/Helpers/Notify.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

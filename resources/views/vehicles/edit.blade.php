@@ -100,16 +100,22 @@
                                value="{{ $vehicle->lokasi }}">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Jarak Tempuh (km)</label>
                         <input type="number" name="distance" class="form-control"
                                value="{{ $vehicle->distance }}">
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">KM Terakhir Ganti Oli</label>
+                    <div class="col-md-4">
+                        <label class="form-label">KM Terakhir Ganti Oli (km)</label>
                         <input type="number" name="last_km_for_oil" class="form-control"
                                value="{{ $vehicle->last_km_for_oil }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Interval Ganti Oli (km)</label>
+                        <input type="number" name="oil_change_interval" class="form-control"
+                               value="{{ $vehicle->oil_change_interval }}">
                     </div>
 
                     <div class="col-md-6">

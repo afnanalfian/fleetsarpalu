@@ -73,7 +73,8 @@
                                 'battery' => 'Aki',
                                 'start_engine' => 'Starter Mesin',
                                 'glass_cleanliness' => 'Kebersihan Kaca',
-                                'body_cleanliness' => 'Kebersihan Body'
+                                'body_cleanliness' => 'Kebersihan Body',
+                                'interior_cleanliness' => 'Kebersihan Interior'
                             ];
                         @endphp
 

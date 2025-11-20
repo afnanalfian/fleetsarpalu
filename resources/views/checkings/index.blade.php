@@ -14,9 +14,39 @@
                 {{-- HEADER --}}
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="mb-0">Daftar Pengecekan Kendaraan</h5>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createCheckingModal">
-                        + Buat Pengecekan
-                    </button>
+
+                    <div class="d-flex gap-2">
+                        {{-- Filter Bulan & Tahun --}}
+                        <form method="GET" action="{{ route('checkings.index') }}" class="d-flex gap-2">
+                            <select name="bulan" class="form-select form-select-sm" required>
+                                <option value="">Bulan</option>
+                                @foreach(range(1, 12) as $m)
+                                    <option value="{{ $m }}" {{ request('bulan') == $m ? 'selected' : '' }}>
+                                        {{ DateTime::createFromFormat('!m', $m)->format('F') }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <select name="tahun" class="form-select form-select-sm" required>
+                                <option value="">Tahun</option>
+                                @for($y = date('Y')-5; $y <= date('Y')+5; $y++)
+                                    <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>
+                                        {{ $y }}
+                                    </option>
+                                @endfor
+                            </select>
+
+                            <button class="btn btn-secondary btn-sm">Filter</button>
+                            <a href="{{ route('checkings.index') }}" class="btn btn-outline-dark btn-sm">Reset</a>
+                        </form>
+
+                        {{-- Buat Pengecekan --}}
+                        @if(auth()->user()->role === 'Ketua Tim')
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createCheckingModal">
+                                + Buat Pengecekan
+                            </button>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- TABEL --}}
@@ -26,6 +56,7 @@
                             <tr>
                                 <th>Tanggal</th>
                                 <th>Tim</th>
+                                <th>Shift</th>
                                 <th>Status</th>
                                 <th>Jam Mulai</th>
                                 <th>Jam Selesai</th>
@@ -41,6 +72,20 @@
 
                                     {{-- Tim --}}
                                     <td>{{ $checking->team->name ?? '-' }}</td>
+
+                                    {{-- Shift --}}
+                                    <td>
+                                        @php
+                                            $shiftClass = [
+                                                'Shift 1' => 'primary',
+                                                'Shift 2' => 'info',
+                                            ][$checking->shift] ?? 'secondary';
+                                        @endphp
+
+                                        <span class="badge bg-{{ $shiftClass }}">
+                                            {{ $checking->shift ?? '-' }}
+                                        </span>
+                                    </td>
 
                                     {{-- Status --}}
                                     <td>
@@ -76,7 +121,7 @@
                                         <div class="btn-group">
 
                                             {{-- ABSENSI (hanya tampil jika attendances belum ada) --}}
-                                            @if($checking->attendances->count() == 0)
+                                            @if(auth()->user()->role === 'Ketua Tim' && $checking->attendances->count() == 0)
                                                 <a href="{{ route('attendances.create', $checking->id) }}"
                                                 class="btn btn-warning btn-sm">
                                                     Absensi
@@ -92,7 +137,7 @@
                                             @endif
 
                                             {{-- HAPUS (hanya pending) --}}
-                                            @if($checking->status === 'pending')
+                                            @if(auth()->user()->role === 'Ketua Tim' && $checking->status === 'pending')
                                                 <button class="btn btn-danger btn-sm"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#hapus{{ $checking->id }}">
@@ -160,8 +205,23 @@
 {{-- MODAL CREATE CHECKING --}}
 {{-- ========================= --}}
 @php
+    use Carbon\Carbon;
+
     $teamName = auth()->user()->team->name ?? '-';
-    $today = \Carbon\Carbon::now()->format('d M Y');
+
+    $now = Carbon::now();
+    $hour = (int) $now->format('H');
+
+    // Tentukan shift & tanggal
+    if ($hour >= 8 && $hour < 20) {
+        $shift = 'Shift 1';
+        $displayDate = $now->format('d M Y');
+    } else {
+        $shift = 'Shift 2';
+        // Jika jam 00:00–07:59 → mundurkan tanggal
+        $shiftDate = $hour < 8 ? $now->copy()->subDay() : $now;
+        $displayDate = $shiftDate->format('d M Y');
+    }
 @endphp
 
 <div class="modal fade" id="createCheckingModal" tabindex="-1">
@@ -174,8 +234,14 @@
             </div>
 
             <div class="modal-body">
-                Apakah benar <strong>{{ $teamName }}</strong> akan melakukan pengecekan pada
-                <strong>{{ $today }}</strong>?
+                <p>
+                    Apakah benar <strong>{{ $teamName }}</strong> akan melakukan pengecekan pada
+                    <strong>{{ $displayDate }}</strong>?
+                </p>
+
+                <p class="mt-2">
+                    <strong>Shift:</strong> {{ $shift }}
+                </p>
             </div>
 
             <div class="modal-footer">
@@ -189,5 +255,6 @@
         </div>
     </div>
 </div>
+
 
 @endsection

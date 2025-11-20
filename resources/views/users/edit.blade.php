@@ -88,10 +88,10 @@
                     <div class="col-md-4">
                         <label class="form-label w-100 text-start">Role<span class="text-danger">*</span></label>
                         <select id="Role" name="role" class="form-select" @required(true)>
-                            <option value="pegawai" {{ old('role', $user->role) == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
-                            <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="sumda" {{ old('role', $user->role) == 'sumda' ? 'selected' : '' }}>Kepala Sumber Daya</option>
-                            <option value="ketua_tim" {{ old('role', $user->role) == 'ketua_tim' ? 'selected' : '' }}>Ketua Tim</option>
+                            <option value="Pegawai" {{ old('role', $user->role) == 'Pegawai' ? 'selected' : '' }}>Pegawai</option>
+                            <option value="Admin" {{ old('role', $user->role) == 'Admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="Kepala Sumber Daya" {{ old('role', $user->role) == 'Kepala Sumber Daya' ? 'selected' : '' }}>Kepala Sumber Daya</option>
+                            <option value="Ketua Tim" {{ old('role', $user->role) == 'Ketua Tim' ? 'selected' : '' }}>Ketua Tim</option>
                         </select>
                         @error('role')
                             <div class="text-danger text-start"><small>{{ $message }}</small></div>

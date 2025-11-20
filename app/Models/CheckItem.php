@@ -42,6 +42,8 @@ class CheckItem extends Model
         'glass_cleanliness_note',
         'body_cleanliness_ok',
         'body_cleanliness_note',
+        'interior_cleanliness_ok',
+        'interior_cleanliness_note',
         'photos',
         'condition'
     ];
@@ -67,18 +69,34 @@ class CheckItem extends Model
      */
     public function evaluateCondition()
     {
-        $items = [
-            'lampu_hazard', 'klakson', 'sirine',
-            'ban', 'rem', 'aki', 'start_engine'
+        // Ambil semua kolom yang diakhiri dengan _ok
+        $okColumns = [
+            'radiator_ok',
+            'air_filter_ok',
+            'wiper_ok',
+            'lights_ok',
+            'leaks_ok',
+            'hazards_ok',
+            'horn_ok',
+            'siren_ok',
+            'tires_ok',
+            'brakes_ok',
+            'battery_ok',
+            'start_engine_ok',
+            'glass_cleanliness_ok',
+            'body_cleanliness_ok',
+            'interior_cleanliness_ok',
         ];
 
-        foreach ($items as $item) {
-            if ($this->{$item} === 'tidak_aman') {
-                $this->status = 'Rusak';
+        // Cek apakah ada salah satu kolom yang != 1
+        foreach ($okColumns as $col) {
+            if ($this->{$col} != 1) {
+                $this->condition = 'Rusak';
                 return;
             }
         }
 
-        $this->status = 'Baik';
+        // Jika lolos semua
+        $this->condition = 'Baik';
     }
 }

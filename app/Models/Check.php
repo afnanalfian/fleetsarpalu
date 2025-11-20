@@ -12,6 +12,7 @@ class Check extends Model
     protected $fillable = [
         'team_id',
         'scheduled_date',
+        'shift',
         'status',
         'started_at',
         'completed_at',

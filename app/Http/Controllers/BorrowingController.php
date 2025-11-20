@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\BorrowRequest;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,31 +17,65 @@ class BorrowingController extends Controller
      */
     public function index(Request $request)
     {
-        $borrowings = BorrowRequest::with('vehicle')->get();
-        // Loop semua peminjaman & update otomatis jika waktunya sudah tiba
-        foreach ($borrowings as $borrow) {
-            $borrow->updateStatusAutomatically();
-            $borrow->syncVehicleStatus();
-        }
+        // Update otomatis status
+        BorrowRequest::with('vehicle')->get()->each(function ($b) {
+            $b->updateStatusAutomatically();
+            $b->syncVehicleStatus();
+        });
+
         $user = Auth::user();
 
         $query = BorrowRequest::with(['user', 'vehicle', 'team']);
 
-        // Filter role: Pegawai hanya lihat pengajuan sendiri
-        if ($user->role === 'Pegawai') {
+        // Ketua Tim / Pegawai → hanya miliknya
+        if (!$user->hasRole(['admin', 'kepala sumber daya'])) {
             $query->where('user_id', $user->id);
         }
 
-        // Filter status (opsional)
+        // Filter status biasa
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Urut terbaru dulu
-        $borrowings = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        // ======== FILTER BARU ========
+        if ($request->filled('filter_by')) {
 
+            switch ($request->filter_by) {
 
-        // NOTE: blade expects $borrowings
+                case 'nama':
+                    if ($request->filled('nama')) {
+                        $query->whereHas('user', function ($q) use ($request) {
+                            $q->where('name', 'LIKE', '%' . $request->nama . '%');
+                        });
+                    }
+                    break;
+
+                case 'tanggal':
+                    if ($request->filled('tanggal')) {
+                        $query->whereDate('start_at', $request->tanggal);
+                    }
+                    break;
+
+                case 'bulan':
+                    if ($request->filled('bulan') && $request->filled('tahun')) {
+                        $query->whereYear('start_at', $request->tahun)
+                            ->whereMonth('start_at', $request->bulan);
+                    }
+                    break;
+
+                case 'kendaraan':
+                    if ($request->filled('kendaraan')) {
+                        $query->where('vehicle_id', $request->kendaraan);
+                    }
+                    break;
+            }
+        }
+
+        // ORDER + PAGINATION
+        $borrowings = $query->orderBy('created_at', 'desc')
+                            ->paginate(10)
+                            ->withQueryString();
+
         return view('borrowings.index', compact('borrowings'));
     }
 
@@ -126,6 +161,17 @@ class BorrowingController extends Controller
             'surat_tugas_path'    => $filePath,
             'status'              => 'Pending', // gunakan kapital seperti view kamu
         ]);
+        $sumdas = User::where('role', 'Kepala Sumber Daya')->get();
+        $user = Auth::user();
+
+        foreach ($sumdas as $sd) {
+            notify(
+                $sd->id,
+                "Pengajuan Peminjaman Baru",
+                "Peminjaman dibuat oleh {$user->name}, menunggu konfirmasi",
+                route('borrowings.index')
+            );
+        }
 
         return redirect()->route('borrowings.index')->with('success', 'Pengajuan berhasil dikirim.');
     }
@@ -210,12 +256,22 @@ class BorrowingController extends Controller
     public function approve($id)
     {
         $borrow = BorrowRequest::findOrFail($id);
+        if (!auth()->user()->hasRole(['kepala sumber daya'])) {
+            abort(403, 'Hanya Kepala Sumber Daya yang boleh menyetujui.');
+        }
 
         $borrow->update([
             'status'      => 'Approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
+        notify(
+            $borrow->user_id,
+            "Peminjaman Disetujui",
+            "Peminjaman anda untuk kendaraan {$borrow->vehicle->name} pada tanggal "
+                . $borrow->start_at->format('d M Y') . " telah disetujui. Jangan lupa memotret indikator sebelum berangkat, dan mengambil gambar saat sudah di lokasi",
+            route('borrowings.show', $borrow->id)
+        );
 
         return back()->with('success', 'Pengajuan disetujui.');
     }
@@ -230,6 +286,9 @@ class BorrowingController extends Controller
         ]);
 
         $borrow = BorrowRequest::findOrFail($id);
+        if (!auth()->user()->hasRole(['kepala sumber daya'])) {
+            abort(403, 'Hanya Kepala Sumber Daya yang boleh menolak.');
+        }
 
         $borrow->update([
             'status'           => 'Rejected',
@@ -276,6 +335,10 @@ class BorrowingController extends Controller
     public function cancel($id)
     {
         $borrow = BorrowRequest::findOrFail($id);
+        // ❗ Semua role → hanya pemilik boleh cancel
+        if ($borrow->user_id !== auth()->id()) {
+            abort(403, 'Tidak boleh membatalkan peminjaman orang lain.');
+        }
 
         // Hanya bisa dibatalkan jika belum selesai atau dibatalkan sebelumnya
         if (!in_array(strtolower($borrow->status), ['completed', 'cancelled'])) {

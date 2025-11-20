@@ -67,10 +67,10 @@
                     <div class="col-md-4">
                         <label for="Role" class="form-label w-100 text-start">Role<span class="text-danger">*</span></label>
                         <select id="Role" name="role" class="form-select" @required(true)>
-                            <option value="pegawai" selected>Pegawai</option>
-                            <option value="admin">Admin</option>
-                            <option value="sumda">Kepala Sumber Daya</option>
-                            <option value="ketua_tim">Ketua Tim</option>
+                            <option value="Pegawai" selected>Pegawai</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Kepala Sumber Daya">Kepala Sumber Daya</option>
+                            <option value="Ketua Tim">Ketua Tim</option>
                         </select>
                         @error('role')
                             <div class="text-danger text-start"><small>{{ $message }}</small></div>

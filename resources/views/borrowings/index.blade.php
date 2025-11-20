@@ -10,9 +10,79 @@
         <h5 class="mb-3 mb-md-0">Data Peminjaman Kendaraan</h5>
 
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="{{ route('borrowings.create') }}" class="btn btn-warning rounded">
+            <a href="{{ route('borrowings.create') }}" class="btn btn-warning btn-sm rounded">
                 Pinjam Kendaraan <i class="fa-solid fa-key ms-1"></i>
             </a>
+            <a href="{{ route('reports.borrow.form') }}" class="btn btn-success btn-sm rounded">
+                Generate Laporan <i class="fa-solid fa-file-export ms-1"></i>
+            </a>
+
+            {{-- Filter Pencarian Lanjutan --}}
+            <form method="GET" action="{{ route('borrowings.index') }}" class="d-flex flex-wrap gap-2 align-items-end bg-light p-3 rounded shadow-sm">
+
+                {{-- PILIH KATEGORI FILTER --}}
+                <div>
+                    <label class="form-label mb-1 small">Filter Berdasarkan</label>
+                    <select name="filter_by" id="filter_by" class="form-select-sm">
+                        <option value="">-- Pilih --</option>
+                        <option value="nama"  {{ request('filter_by')==='nama' ? 'selected' : '' }}>Nama Peminjam</option>
+                        <option value="tanggal" {{ request('filter_by')==='tanggal' ? 'selected' : '' }}>Tanggal</option>
+                        <option value="bulan" {{ request('filter_by')==='bulan' ? 'selected' : '' }}>Bulan</option>
+                        <option value="kendaraan" {{ request('filter_by')==='kendaraan' ? 'selected' : '' }}>Kendaraan</option>
+                    </select>
+                </div>
+
+                {{-- INPUT NAMA --}}
+                <div id="filter_nama" style="display:none;">
+                    <input type="text" name="nama" class="form-control form-control-sm" placeholder="Masukkan nama..."
+                        value="{{ request('nama') }}">
+                </div>
+
+                {{-- INPUT TANGGAL --}}
+                <div id="filter_tanggal" style="display:none;">
+                    <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ request('tanggal') }}">
+                </div>
+
+                {{-- INPUT BULAN + TAHUN --}}
+                <div id="filter_bulan" style="display:none;">
+                    <select name="bulan" class="form-select-sm">
+                        @foreach(range(1,12) as $m)
+                            <option value="{{ $m }}" {{ request('bulan')==$m ? 'selected' : '' }}>
+                                {{ DateTime::createFromFormat('!m', $m)->format('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div id="filter_tahun" style="display:none;">
+                    <select name="tahun" class="form-select-sm">
+                        @for ($y = date('Y') - 5; $y <= date('Y') + 5; $y++)
+                            <option value="{{ $y }}" {{ request('tahun')==$y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                {{-- INPUT KENDARAAN --}}
+                <div id="filter_kendaraan" style="display:none;">
+                    <select name="kendaraan" class="form-select-sm">
+                        <option value="">-- Pilih Kendaraan --</option>
+                        @foreach(\App\Models\Vehicle::orderBy('name')->get() as $veh)
+                            <option value="{{ $veh->id }}" {{ request('kendaraan')==$veh->id ? 'selected' : '' }}>
+                                {{ $veh->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- TOMBOL --}}
+                <div>
+                    <button class="btn btn-primary btn-sm">Cari</button>
+                    <a href="{{ route('borrowings.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+                </div>
+
+            </form>
 
             {{-- Filter Status --}}
             <form method="GET" action="{{ route('borrowings.index') }}" class="d-flex align-items-center">
@@ -34,6 +104,7 @@
                 </button>
                 <div class="dropdown-menu p-3" style="min-width: 200px;">
                     @foreach([
+                        'kode' => 'Kode Pinjam',
                         'nip' => 'NIP Peminjam',
                         'nama' => 'Nama Peminjam',
                         'kendaraan' => 'Kendaraan',
@@ -58,31 +129,31 @@
         <table class="table table-hover align-middle text-center" id="borrowingsTable">
             <thead class="table-light">
                 <tr>
-                    <th style="white-space: nowrap;">Kode Pinjam</th>
-                    <th style="white-space: nowrap;">NIP Peminjam</th>
-                    <th style="white-space: nowrap;">Nama Peminjam</th>
-                    <th style="white-space: nowrap;">Kendaraan</th>
-                    <th style="white-space: nowrap;">Tujuan</th>
-                    <th style="white-space: nowrap;">Tanggal Pergi</th>
-                    <th style="white-space: nowrap;">Jam Pergi</th>
-                    <th style="white-space: nowrap;">Tanggal Pulang</th>
-                    <th style="white-space: nowrap;">Jam Pulang</th>
-                    <th style="white-space: nowrap;">Status</th>
-                    <th style="white-space: nowrap; position: sticky; right: 0; background: #f8f9fa; z-index: 2;">Aksi</th>
+                    <th data-col="kode" style="white-space: nowrap;">Kode Pinjam</th>
+                    <th data-col="nip" style="white-space: nowrap;">NIP Peminjam</th>
+                    <th data-col="nama" style="white-space: nowrap;">Nama Peminjam</th>
+                    <th data-col="kendaraan" style="white-space: nowrap;">Kendaraan</th>
+                    <th data-col="tujuan" style="white-space: nowrap;">Tujuan</th>
+                    <th data-col="tgl_pergi" style="white-space: nowrap;">Tanggal Pergi</th>
+                    <th data-col="jam_pergi" style="white-space: nowrap;">Jam Pergi</th>
+                    <th data-col="tgl_pulang" style="white-space: nowrap;">Tanggal Pulang</th>
+                    <th data-col="jam_pulang" style="white-space: nowrap;">Jam Pulang</th>
+                    <th data-col="nip" style="white-space: nowrap;">Status</th>
+                    <th data-col="nip" style="white-space: nowrap; position: sticky; right: 0; background: #f8f9fa; z-index: 2;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($borrowings as $borrow)
                     <tr>
-                        <td style="white-space: nowrap;">{{ $borrow->kode_pinjam }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->user->NIP ?? '-' }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->user->name ?? '-' }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->vehicle->name ?? '-' }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->destination_address }}</td>
-                        <td style="white-space: nowrap;">{{ \Carbon\Carbon::parse($borrow->start_at)->format('d/m/Y') }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->start_time }}</td>
-                        <td style="white-space: nowrap;">{{ \Carbon\Carbon::parse($borrow->end_at)->format('d/m/Y') }}</td>
-                        <td style="white-space: nowrap;">{{ $borrow->end_time }}</td>
+                        <td data-col="kode" style="white-space: nowrap;">{{ $borrow->kode_pinjam }}</td>
+                        <td data-col="nip" style="white-space: nowrap;">{{ $borrow->user->NIP ?? '-' }}</td>
+                        <td data-col="nama" style="white-space: nowrap;">{{ $borrow->user->name ?? '-' }}</td>
+                        <td data-col="kendaraan" style="white-space: nowrap;">{{ $borrow->vehicle->name ?? '-' }}</td>
+                        <td data-col="tujuan" style="white-space: nowrap;">{{ $borrow->destination_address }}</td>
+                        <td data-col="tgl_pergi" style="white-space: nowrap;">{{ \Carbon\Carbon::parse($borrow->start_at)->format('d/m/Y') }}</td>
+                        <td data-col="jam_pergi" style="white-space: nowrap;">{{ $borrow->start_time }}</td>
+                        <td data-col="tgl_pulang" style="white-space: nowrap;">{{ \Carbon\Carbon::parse($borrow->end_at)->format('d/m/Y') }}</td>
+                        <td data-col="jam_pulang" style="white-space: nowrap;">{{ $borrow->end_time }}</td>
 
                         {{-- Status --}}
                         <td style="white-space: nowrap;">
@@ -105,22 +176,34 @@
                         {{-- AKSI --}}
                         <td class="position-sticky end-0 bg-white">
                             <div class="btn-group btn-group-sm" role="group">
+
+                                {{-- Detail selalu tampil --}}
                                 <a href="{{ route('borrowings.show', $borrow->id) }}" class="btn btn-info text-white">
                                     Detail
                                 </a>
 
-                                @if($borrow->status === 'In Use')
-                                    <a href="{{ route('reports.create', $borrow->id) }}" class="btn btn-sm btn-warning">
-                                        Selesaikan
-                                    </a>
+                                {{-- Tombol untuk PEMILIK PEMINJAMAN SAJA --}}
+                                @if(auth()->id() === $borrow->user_id)
+
+                                    {{-- Selesaikan (hanya jika status In Use) --}}
+                                    @if($borrow->status === 'In Use')
+                                        <a href="{{ route('reports.create', $borrow->id) }}" class="btn btn-warning">
+                                            Selesaikan
+                                        </a>
+                                    @endif
+
+                                    {{-- Cancel (hanya jika pending/approved/in use) --}}
+                                    @if(!in_array(strtolower($borrow->status), ['cancelled', 'completed', 'rejected']))
+                                        <button type="button"
+                                            class="btn btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#Cancel{{ $borrow->id }}">
+                                            Cancel
+                                        </button>
+                                    @endif
+
                                 @endif
 
-                                @if(!in_array(strtolower($borrow->status), ['cancelled', 'completed', 'rejected']))
-                                    <button type="button" class="btn btn-danger btn-sm"
-                                            data-bs-toggle="modal" data-bs-target="#Cancel{{ $borrow->id }}">
-                                        Cancel
-                                    </button>
-                                @endif
                             </div>
                         </td>
                     </tr>
@@ -174,5 +257,19 @@
             });
         });
     });
+
+function toggleFilters() {
+    const val = document.getElementById('filter_by').value;
+
+    document.getElementById('filter_nama').style.display = (val === 'nama') ? 'block' : 'none';
+    document.getElementById('filter_tanggal').style.display = (val === 'tanggal') ? 'block' : 'none';
+    document.getElementById('filter_bulan').style.display = (val === 'bulan') ? 'block' : 'none';
+    document.getElementById('filter_tahun').style.display = (val === 'bulan') ? 'block' : 'none';
+    document.getElementById('filter_kendaraan').style.display = (val === 'kendaraan') ? 'block' : 'none';
+}
+
+document.getElementById('filter_by').addEventListener('change', toggleFilters);
+toggleFilters(); // load awal
 </script>
+
 @endsection

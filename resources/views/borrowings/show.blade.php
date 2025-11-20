@@ -123,22 +123,31 @@
                         @endif
                     </table>
                 </div>
-
                 {{-- Tombol Aksi --}}
                 <div class="mt-4 d-flex justify-content-start gap-2">
-                    @if(strtolower($borrow->status) === 'pending' && $borrow->useReport)
-                    <a href="{{ route('borrowings.edit', $borrow->id) }}" class="btn btn-primary">
-                        <i class="fa-solid fa-pen me-1"></i> Edit Peminjaman
-                    </a>
+
+                    {{-- ======= EDIT PEMINJAMAN — hanya pemilik & status pending ======= --}}
+                    @if(auth()->id() === $borrow->user_id && strtolower($borrow->status) === 'pending')
+                        <a href="{{ route('borrowings.edit', $borrow->id) }}" class="btn btn-primary">
+                            <i class="fa-solid fa-pen me-1"></i> Edit Peminjaman
+                        </a>
                     @endif
 
+
+                    {{-- ======= LIHAT LAPORAN KONDISI ======= --}}
                     @if(strtolower($borrow->status) === 'completed' && $borrow->useReport)
-                        <a href="{{ route('usereports.show', ['id' => $borrow->useReport->id]) }}" class="btn btn-info">
+                        <a href="{{ route('usereports.show', ['id' => $borrow->useReport->id]) }}"
+                        class="btn btn-info">
                             <i class="fa-solid fa-file-alt me-1"></i> Lihat Laporan Kondisi
                         </a>
                     @endif
-                    @if($borrow->status === 'Pending')
-                        <form action="{{ route('borrowings.approve', $borrow->id) }}" method="POST" class="d-inline">
+
+
+                    {{-- ======= SETUJUI / TOLAK — hanya Kepala Sumber Daya ======= --}}
+                    @if(auth()->user()->role === 'Kepala Sumber Daya' && $borrow->status === 'Pending')
+
+                        <form action="{{ route('borrowings.approve', $borrow->id) }}"
+                            method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-success"
                                     onclick="return confirm('Setujui peminjaman ini?')">
@@ -146,11 +155,22 @@
                             </button>
                         </form>
 
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#RejectModal">
+                        <button type="button" class="btn btn-danger"
+                                data-bs-toggle="modal" data-bs-target="#RejectModal">
                             Tolak Peminjaman
                         </button>
+
+                    @elseif($borrow->status === 'Pending')
+
+                        {{-- Jika bukan Kepala SD, tampilkan keterangan saja --}}
+                        <span class="badge bg-warning text-dark align-self-center">
+                            Sedang Menunggu Persetujuan
+                        </span>
+
                     @endif
+
                 </div>
+
                 {{-- Modal Penolakan --}}
                 <div class="modal fade" id="RejectModal" tabindex="-1" aria-labelledby="RejectModalLabel" aria-hidden="true">
                     <div class="modal-dialog">

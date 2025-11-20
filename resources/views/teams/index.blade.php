@@ -10,9 +10,21 @@
             <div class="bg-light text-center rounded p-4">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">Data Tim</h6>
-                    <a href="{{ route('teams.create') }}" class="text-decoration-none">
-                        <button type="submit" class="btn btn-sm btn-primary">+ Tambah Tim</button>
-                    </a>
+                    @if (in_array(strtolower(auth()->user()->role), ['admin','kepala sumber daya']))
+                        <div class="d-flex justify-content-end gap-2 mb-3">
+
+                            {{-- Tombol Atur Team --}}
+                            <a href="{{ route('teams.manage') }}" class="btn btn-warning rounded">
+                                Manage Team <i class="fa-solid ms-1"></i>
+                            </a>
+
+                            {{-- Tombol Tambah Team --}}
+                            <a href="{{ route('teams.create') }}" class="btn btn-primary rounded">
+                                + Tambah Team <i class="fa-solid ms-1"></i>
+                            </a>
+
+                        </div>
+                    @endif
                 </div>
 
                 <div class="table-responsive">
@@ -37,12 +49,14 @@
                                     <div class="btn-group" role="group">
                                         <a href="{{ route('teams.show', $team->id) }}" class="btn btn-info btn-sm">Detail</a>
 
-                                        <a href="{{ route('teams.edit', $team->id) }}" class="btn btn-success btn-sm">Ubah</a>
+                                        @if (in_array(strtolower(auth()->user()->role), ['admin', 'kepala sumber daya']))
+                                            <a href="{{ route('teams.edit', $team->id) }}" class="btn btn-success btn-sm">Ubah</a>
 
-                                        <button type="button" class="btn btn-danger btn-sm"
-                                                data-bs-toggle="modal" data-bs-target="#Hapus{{ $team->id }}">
-                                            Hapus
-                                        </button>
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal" data-bs-target="#Hapus{{ $team->id }}">
+                                                Hapus
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
