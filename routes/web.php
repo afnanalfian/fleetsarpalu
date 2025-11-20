@@ -189,14 +189,23 @@ Route::middleware('auth')->group(function () {
     // ⭕ CHECK ITEM
     // ======================================================
     Route::middleware(['userAccess:pegawai,ketua tim,admin,kepala sumber daya'])->group(function () {
-        Route::get('/checkitems/{checkitem}', [CheckItemController::class, 'show'])->name('checkitems.show');
-        Route::get('/checkitems', [CheckItemController::class, 'edit'])
+
+        // Detail laporan (SHOW)
+        Route::get('/checkitems/{id}', [CheckItemController::class, 'show'])
+            ->name('checkitems.show');
+
+        // Form edit
+        Route::get('/checkitems/{id}/edit', [CheckItemController::class, 'edit'])
             ->middleware('userAccess:pegawai,ketua tim')
             ->name('checkitems.edit');
-        Route::get('/checkitems', [CheckItemController::class, 'update'])
+
+        // Update hasil cek → HARUS PUT/PATCH
+        Route::put('/checkitems/{id}', [CheckItemController::class, 'update'])
             ->middleware('userAccess:pegawai,ketua tim')
             ->name('checkitems.update');
-        Route::get('/checkitems', [CheckItemController::class, 'destroy'])
+
+        // Hapus (jika kamu butuh destroy)
+        Route::delete('/checkitems/{id}', [CheckItemController::class, 'destroy'])
             ->middleware('userAccess:pegawai,ketua tim')
             ->name('checkitems.destroy');
     });
@@ -206,20 +215,21 @@ Route::middleware('auth')->group(function () {
     // ⭕ ATTENDANCES
     // ======================================================
     Route::middleware(['userAccess:ketua tim'])->group(function () {
-        // Tampilkan form create
+
+        // CREATE FORM
         Route::get('/attendances/create/{check_id}', [AttendanceController::class, 'create'])
             ->name('attendances.create');
 
-        // Simpan data
-        Route::post('/attendances', [AttendanceController::class, 'store'])
+        // STORE (SAVE)
+        Route::post('/attendances/{check_id}', [AttendanceController::class, 'store'])
             ->name('attendances.store');
 
-        // Tampilkan form edit
-        Route::get('/attendances/{attendance}/edit', [AttendanceController::class, 'edit'])
+        // EDIT FORM
+        Route::get('/attendances/{check_id}/edit', [AttendanceController::class, 'edit'])
             ->name('attendances.edit');
 
-        // Update data
-        Route::put('/attendances/{attendance}', [AttendanceController::class, 'update'])
+        // UPDATE (SAVE PERUBAHAN)
+        Route::put('/attendances/{check_id}', [AttendanceController::class, 'update'])
             ->name('attendances.update');
     });
 
