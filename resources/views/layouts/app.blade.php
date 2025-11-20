@@ -9,29 +9,19 @@
 
 <body>
 <div class="container-fluid p-0">
-
-    {{-- SIDEBAR --}}
     @include('layouts.sidebar')
-
-    {{-- MAIN CONTENT --}}
     <main class="content">
-
-        {{-- HEADER --}}
         @include('layouts.header')
 
-        {{-- CONTENT SLOT --}}
         <div class="p-4">
             @yield('content')
         </div>
 
-        {{-- FOOTER --}}
         @include('layouts.footer')
     </main>
-
 </div>
 
-{{-- <script src="{{ asset('js/dashboard.js') }}"></script> --}}
-{{-- Jangan load dashboard.js di halaman manage team --}}
 <script src="https://kit.fontawesome.com/e814145206.js" crossorigin="anonymous"></script>
+<script src="{{ asset('js/dashboard.js') }}"></script>
 </body>
 </html>

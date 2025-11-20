@@ -1,12 +1,15 @@
-// Hamburger toggler
-const hamburger = document.querySelector(".sidebar-toggler");
-const sidebar = document.querySelector(".sidebar");
-const content = document.querySelector(".content");
+document.addEventListener("DOMContentLoaded", () => {
+    const hamburger = document.querySelector(".sidebar-toggler");
+    const sidebar = document.getElementById("sidebar");
+    const content = document.querySelector(".content");
 
-if (hamburger) {
-    hamburger.addEventListener('click', (e)=> {
-        e.preventDefault();
-        sidebar.classList.toggle('open');
-        content.classList.toggle('open');
-    });
-}
+    if (hamburger && sidebar && content) {
+        hamburger.addEventListener("click", (e) => {
+            e.preventDefault();
+            sidebar.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+
+            console.log("Sidebar toggled"); // Debug
+        });
+    }
+});

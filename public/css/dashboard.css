@@ -24,6 +24,10 @@ body {
     height: 70px !important;
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
+    z-index: 2000;
+    position: sticky;
+    top:0;
+    z-index: 9999 !important;
 }
 
 .navbar .nav-link {
@@ -41,6 +45,16 @@ body {
     align-items: center;
     justify-content: center;
 }
+.dropdown-menu {
+    z-index: 3000 !important;
+}
+.content {
+    overflow: visible !important;
+}
+.nav-link .fa-bell {
+    pointer-events: none;
+}
+
 
 /* ===============================
    BUTTON PRIMARY
@@ -52,21 +66,6 @@ body {
     background-color: var(--primary) !important;
     border-color: var(--primary-hover) !important;
     color: var(--black) !important;
-}
-
-/* ===============================
-   SIDEBAR
-=============================== */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    bottom: 0;
-    background: var(--light);
-    overflow-y: auto;
-    transition: 0.4s ease;
-    z-index: 999;
 }
 
 /* Sidebar item */
@@ -144,26 +143,48 @@ a:hover > i.fa-caret-right {
     opacity: 1 !important;
 }
 
+/* ================================
+   SIDEBAR (DESKTOP)
+=============================== */
+.sidebar {
+    position: fixed;
+    width: 250px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: var(--light);
+    transition: 0.4s ease;
+}
 
-/* ===============================
-   SIDEBAR RESPONSIVE (MOBILE)
+/* klik → tutup */
+.sidebar.sidebar-open {
+    margin-left: -250px;
+}
+
+/* Content geser sesuai sidebar */
+.content.sidebar-open {
+    margin-left: 0;
+}
+
+/* Saat sidebar tersembunyi */
+.content.open {
+    margin-left: 0;
+}
+
+/* ================================
+   SIDEBAR (MOBILE)
 =============================== */
 @media (max-width: 991.98px) {
-
     .sidebar {
-        margin-left: -250px;
+        margin-left: -250px; /* default tertutup */
     }
 
     .sidebar.open {
-        margin-left: 0;
+        margin-left: 0; /* klik → buka */
     }
 
     .content {
         margin-left: 0;
-        width: 100%;
-    }
-
-    .logo {
-        display: none;
     }
 }
+

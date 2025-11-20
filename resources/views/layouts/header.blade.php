@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-3">
     {{-- HAMBURGER --}}
-    <button class="btn btn-outline-light d-lg-none me-3" id="sidebarToggle">
+    <button class="btn btn-outline-dark me-3 sidebar-toggler">
         <i class="fa-solid fa-bars"></i>
     </button>
     <div class="d-flex align-items-center ms-auto gap-3">
@@ -20,7 +20,7 @@
         @endphp
 
         <div class="nav-item dropdown me-3">
-            <a class="nav-link position-relative" data-bs-toggle="dropdown" style="cursor: pointer;">
+            <a href="#" role="button" class="nav-link position-relative" data-bs-toggle="dropdown" style="cursor: pointer;">
                 <i class="fa-solid fa-bell fa-lg text-dark"></i>
 
                 {{-- Badge Unread --}}
@@ -67,7 +67,7 @@
 
         {{-- Username & Dropdown --}}
         <div class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+            <a href="#" role="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                 <span class="d-none d-lg-inline-flex">{{ auth()->user()->name }}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-end bg-light border-1 rounded-0 rounded-bottom m-0">

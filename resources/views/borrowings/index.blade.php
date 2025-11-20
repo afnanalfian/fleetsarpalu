@@ -187,7 +187,7 @@
 
                                     {{-- Selesaikan (hanya jika status In Use) --}}
                                     @if($borrow->status === 'In Use')
-                                        <a href="{{ route('reports.create', $borrow->id) }}" class="btn btn-warning">
+                                        <a href="{{ route('usereports.create', $borrow->id) }}" class="btn btn-warning">
                                             Selesaikan
                                         </a>
                                     @endif
