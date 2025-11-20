@@ -206,10 +206,21 @@ Route::middleware('auth')->group(function () {
     // ⭕ ATTENDANCES
     // ======================================================
     Route::middleware(['userAccess:ketua tim'])->group(function () {
-        Route::get('/attendances/{attendance}', [AttendanceController::class, 'create'])->name('attendances.create');
-        Route::get('/attendances/{attendance}', [AttendanceController::class, 'store'])->name('attendances.store');
-        Route::get('/attendances/{attendance}', [AttendanceController::class, 'edit'])->name('attendances.edit');
-        Route::get('/attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
+        // Tampilkan form create
+        Route::get('/attendances/create/{check_id}', [AttendanceController::class, 'create'])
+            ->name('attendances.create');
+
+        // Simpan data
+        Route::post('/attendances', [AttendanceController::class, 'store'])
+            ->name('attendances.store');
+
+        // Tampilkan form edit
+        Route::get('/attendances/{attendance}/edit', [AttendanceController::class, 'edit'])
+            ->name('attendances.edit');
+
+        // Update data
+        Route::put('/attendances/{attendance}', [AttendanceController::class, 'update'])
+            ->name('attendances.update');
     });
 
 
