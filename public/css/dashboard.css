@@ -48,9 +48,7 @@ body {
 .dropdown-menu {
     z-index: 3000 !important;
 }
-.content {
-    overflow: visible !important;
-}
+
 .nav-link .fa-bell {
     pointer-events: none;
 }
@@ -103,7 +101,9 @@ a:hover > i.fa-caret-right {
     margin-left: 250px;
     min-height: 100vh;
     background: var(--white);
-    transition: 0.4s ease;
+    overflow: visible !important;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
 }
 
 /* ===============================
@@ -153,7 +153,8 @@ a:hover > i.fa-caret-right {
     bottom: 0;
     left: 0;
     background: var(--light);
-    transition: 0.4s ease;
+    transition: 0.3s ease;
+    margin-left: 0;
 }
 
 /* klik → tutup */
@@ -176,15 +177,21 @@ a:hover > i.fa-caret-right {
 =============================== */
 @media (max-width: 991.98px) {
     .sidebar {
-        margin-left: -250px; /* default tertutup */
+        margin-left: -250px !important;
+        transition: margin-left 0.3s ease;
     }
 
-    .sidebar.open {
-        margin-left: 0; /* klik → buka */
+    .sidebar.sidebar-open {
+        margin-left: 0 !important;
     }
 
     .content {
-        margin-left: 0;
+        margin-left: 0 !important;
+    }
+
+    .content.sidebar-open {
+        margin-left: 0 !important;
+        transition: margin-left 0.3s ease;
     }
 }
 
