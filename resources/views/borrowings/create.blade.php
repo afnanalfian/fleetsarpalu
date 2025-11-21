@@ -55,7 +55,7 @@
                     {{-- Jam Pergi --}}
                     <div class="col-md-6">
                         <label for="start_time" class="form-label">Jam Pergi <span class="text-danger">*</span></label>
-                        <input type="text" lang="id" name="start_time" value="{{ old('start_time') }}" class="form-control @error('start_time') is-invalid @enderror" required>
+                        <input type="time" lang="id" name="start_time" value="{{ old('start_time') }}" class="form-control @error('start_time') is-invalid @enderror" required>
                         @error('start_time')
                             <div class="text-danger"><small>{{ $message }}</small></div>
                         @enderror
@@ -64,7 +64,7 @@
                     {{-- Jam Pulang --}}
                     <div class="col-md-6">
                         <label for="end_time" class="form-label">Jam Pulang <span class="text-danger">*</span></label>
-                        <input type="text" lang="id" name="end_time" value="{{ old('end_time') }}" class="form-control @error('end_time') is-invalid @enderror" required>
+                        <input type="time" lang="id" name="end_time" value="{{ old('end_time') }}" class="form-control @error('end_time') is-invalid @enderror" required>
                         @error('end_time')
                             <div class="text-danger"><small>{{ $message }}</small></div>
                         @enderror
