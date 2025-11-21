@@ -8,8 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             sidebar.classList.toggle('sidebar-open');
             content.classList.toggle('sidebar-open');
-
-            console.log("Sidebar toggled"); // Debug
         });
     }
 });
