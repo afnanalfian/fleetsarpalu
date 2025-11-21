@@ -47,11 +47,8 @@
 
             <div class="row">
                 @foreach([
-                    'kode' => 'Kode Pinjam',
                     'nip' => 'NIP Peminjam',
                     'nama' => 'Nama Peminjam',
-                    'nip_approved' => 'NIP Mengetahui',
-                    'nama_approved' => 'Nama Mengetahui',
                     'kendaraan' => 'Nama Kendaraan',
                     'start' => 'Tanggal & Jam Pergi',
                     'end' => 'Tanggal & Jam Pulang',

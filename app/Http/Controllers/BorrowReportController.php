@@ -64,15 +64,8 @@ class BorrowReportController extends Controller
             $data = [];
 
             // ---- IDENTITAS ----
-            if (in_array('kode', $cols))         $data['Kode Pinjam'] = $b->kode_pinjam;
             if (in_array('nip', $cols))          $data['NIP Peminjam'] = $b->user->NIP ?? '-';
             if (in_array('nama', $cols))         $data['Nama Peminjam'] = $b->user->name ?? '-';
-
-            if (in_array('nip_approved', $cols))
-                $data['NIP Mengetahui'] = $approved->NIP ?? '-';
-
-            if (in_array('nama_approved', $cols))
-                $data['Nama Mengetahui'] = $approved->name ?? '-';
 
             if (in_array('kendaraan', $cols))    $data['Kendaraan'] = $b->vehicle->name ?? '-';
 
