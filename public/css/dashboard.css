@@ -53,6 +53,10 @@ body {
     pointer-events: none;
 }
 
+.notif-dropdown {
+    width: 350px;
+}
+
 
 /* ===============================
    BUTTON PRIMARY
@@ -182,6 +186,7 @@ a:hover > i.fa-caret-right {
         z-index: 3000;
         position: fixed;
         left: 0;
+        width: 250px;
     }
 
     .sidebar.sidebar-open {
@@ -190,11 +195,23 @@ a:hover > i.fa-caret-right {
 
     .content {
         margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .content > .p-4 {
+        padding: 1rem !important;
     }
 
     .content.sidebar-open {
         margin-left: 0 !important;
         transition: margin-left 0.3s ease;
+    }
+
+    .notif-dropdown {
+        width: 90% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        right: auto !important;
     }
 }
 

@@ -31,7 +31,7 @@
                 @endif
             </a>
 
-            <div class="dropdown-menu dropdown-menu-end p-0 shadow" style="width: 350px;">
+            <div class="dropdown-menu dropdown-menu-end p-0 shadow notif-dropdown">
 
                 <div class="p-3 border-bottom d-flex justify-content-between">
                     <strong>Notifikasi</strong>
