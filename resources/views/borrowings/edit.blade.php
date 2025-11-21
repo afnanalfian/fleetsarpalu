@@ -81,7 +81,7 @@
 
                     <div class="col-md-3">
                         <label for="start_time" class="form-label w-100 text-start">Jam Pergi<span class="text-danger">*</span></label>
-                        <input type="time" name="start_time" value="{{ old('start_time', $borrow->start_time) }}"
+                        <input type="time" lang="id" name="start_time" value="{{ old('start_time', $borrow->start_time) }}"
                                class="form-control @error('start_time') is-invalid @enderror" id="start_time" required>
                         @error('start_time')
                             <div class="text-danger text-start"><small>{{ $message }}</small></div>
@@ -90,7 +90,7 @@
 
                     <div class="col-md-6">
                         <label for="end_at" class="form-label w-100 text-start">Tanggal Pulang <span class="text-danger">*</span></label>
-                        <input type="date" name="end_at" id="end_at"
+                        <input type="date" lang="id" name="end_at" id="end_at"
                             class="form-control @error('end_at') is-invalid @enderror"
                             value="{{ old('end_at', optional($borrow->end_at)->format('Y-m-d')) }}" required>
                         @error('end_at')
