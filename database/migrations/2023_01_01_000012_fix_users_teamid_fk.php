@@ -12,13 +12,10 @@ return new class extends Migration
          * Tambah FK users.team_id → teams.id
          */
         Schema::table('users', function (Blueprint $table) {
-            // pastikan kolom tidak punya FK lama
-            $table->dropForeign(['team_id']);
-
-            // pastikan nullable
+            // pastikan kolom nullable
             $table->unsignedBigInteger('team_id')->nullable()->change();
 
-            // tambah FK
+            // tambah FK baru
             $table->foreign('team_id')
                   ->references('id')
                   ->on('teams')
@@ -29,12 +26,7 @@ return new class extends Migration
          * Tambah FK teams.leader_id → users.id
          */
         Schema::table('teams', function (Blueprint $table) {
-            // drop FK lama kalau ada
-            try {
-                $table->dropForeign(['leader_id']);
-            } catch (\Exception $e) {}
-
-            // pastikan nullable
+            // pastikan kolom nullable
             $table->unsignedBigInteger('leader_id')->nullable()->change();
 
             // tambahkan FK
