@@ -180,6 +180,8 @@ a:hover > i.fa-caret-right {
         margin-left: -250px !important;
         transition: margin-left 0.3s ease;
         z-index: 3000;
+        position: fixed;
+        left: 0;
     }
 
     .sidebar.sidebar-open {
@@ -193,9 +195,6 @@ a:hover > i.fa-caret-right {
     .content.sidebar-open {
         margin-left: 0 !important;
         transition: margin-left 0.3s ease;
-    }
-    .sidebar .logo {
-        display: none !important;
     }
 }
 
