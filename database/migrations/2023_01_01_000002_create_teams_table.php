@@ -9,7 +9,10 @@ return new class extends Migration {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('leader_id')->nullable()->constrained('users')->onDelete('set null');
+
+            // TANPA FOREIGN KEY
+            $table->unsignedBigInteger('leader_id')->nullable();
+
             $table->timestamps();
         });
     }

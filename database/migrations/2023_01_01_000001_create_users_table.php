@@ -13,7 +13,10 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->enum('role', ['Admin', 'Kepala Sumber Daya', 'Ketua Tim', 'Pegawai']);
-            $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null');
+
+            // TANPA FOREIGN KEY DULU
+            $table->unsignedBigInteger('team_id')->nullable();
+
             $table->string('password');
             $table->timestamps();
         });
