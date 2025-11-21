@@ -97,6 +97,33 @@
                                 </div>
                             </div>
                         </div>
+                        <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+
+                            @foreach($items as $key => $label)
+                                const radioAman{{ $key }} = document.getElementById("{{ $key }}_ok1");
+                                const radioTidakAman{{ $key }} = document.getElementById("{{ $key }}_ok0");
+                                const noteField{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
+
+                                function updateRequirement{{ $key }}() {
+                                    if (radioTidakAman{{ $key }}.checked) {
+                                        noteField{{ $key }}.setAttribute("required", "required");
+                                        noteField{{ $key }}.placeholder = "Wajib diisi jika tidak aman";
+                                    } else {
+                                        noteField{{ $key }}.removeAttribute("required");
+                                        noteField{{ $key }}.placeholder = "Catatan (opsional)";
+                                    }
+                                }
+
+                                radioAman{{ $key }}.addEventListener("change", updateRequirement{{ $key }});
+                                radioTidakAman{{ $key }}.addEventListener("change", updateRequirement{{ $key }});
+
+                                // Inisialisasi default
+                                updateRequirement{{ $key }}();
+                            @endforeach
+
+                        });
+                        </script>
                     @endforeach
 
                     {{-- Foto --}}

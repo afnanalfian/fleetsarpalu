@@ -30,7 +30,7 @@ class NotificationController extends Controller
         $notif->update(['is_read' => 1]);
 
         // Redirect ke URL tujuan
-        return redirect($notif->url ?? '/');
+        return redirect($notif->link ?? '/');
     }
 
     public function markAll()

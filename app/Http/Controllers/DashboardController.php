@@ -8,6 +8,7 @@ use App\Models\BorrowRequest;
 use App\Models\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\ShiftNotification;
 
 class DashboardController extends Controller
 {
@@ -84,6 +85,7 @@ class DashboardController extends Controller
     public function pegawai()
     {
         $user = auth()->user();
+        $today = now()->format('Y-m-d');
 
         // Ambil team_id user
         $teamId = $user->team_id;
@@ -91,8 +93,13 @@ class DashboardController extends Controller
             ->where('date', today())
             ->whereIn('shift', ['S1', 'S2'])
             ->first();
+        // Cek apakah notifikasi shift untuk user ini sudah dikirim hari ini
+        $alreadyNotified = ShiftNotification::where('user_id', $user->id)
+            ->where('date', $today)
+            ->exists();
 
-        if ($todaySchedule) {
+        if (!$alreadyNotified && $todaySchedule) {
+
             $shift = $todaySchedule->shift === 'S1' ? '1' : '2';
 
             notify(
@@ -101,10 +108,12 @@ class DashboardController extends Controller
                 "Hari ini anda Shift {$shift}, jangan lupa melakukan pengecekan rutin kendaraan operasional",
                 route('checkings.index')
             );
-        }
 
-        // Tanggal hari ini
-        $today = now()->format('Y-m-d');
+            ShiftNotification::create([
+                'user_id'  => $user->id,
+                'date'     => $today,
+            ]);
+        }
 
         // Ambil jadwal tim user hari ini
         $schedule = Schedule::where('team_id', $teamId)
@@ -232,13 +241,20 @@ class DashboardController extends Controller
 
         // Ambil team_id user
         $teamId = $user->team_id;
+        $today = now()->format('Y-m-d');
 
         $todaySchedule = Schedule::where('team_id', $user->team_id)
             ->where('date', today())
             ->whereIn('shift', ['S1', 'S2'])
             ->first();
 
-        if ($todaySchedule) {
+        // Cek apakah notifikasi shift untuk user ini sudah dikirim hari ini
+        $alreadyNotified = ShiftNotification::where('user_id', $user->id)
+            ->where('date', $today)
+            ->exists();
+
+        if (!$alreadyNotified && $todaySchedule) {
+
             $shift = $todaySchedule->shift === 'S1' ? '1' : '2';
 
             notify(
@@ -247,10 +263,12 @@ class DashboardController extends Controller
                 "Hari ini anda Shift {$shift}, jangan lupa melakukan pengecekan rutin kendaraan operasional",
                 route('checkings.index')
             );
-        }
 
-        // Tanggal hari ini
-        $today = now()->format('Y-m-d');
+            ShiftNotification::create([
+                'user_id'  => $user->id,
+                'date'     => $today,
+            ]);
+        }
 
         // Ambil jadwal tim user hari ini
         $schedule = Schedule::where('team_id', $teamId)

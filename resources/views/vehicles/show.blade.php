@@ -104,7 +104,7 @@
                                 <td>
                                     @if ($vehicle->status == 'available')
                                         <span class="badge bg-success">Tersedia</span>
-                                    @elseif ($vehicle->status == 'in_use')
+                                    @elseif ($vehicle->status == 'is_use')
                                         <span class="badge bg-secondary">Digunakan</span>
                                     @else
                                         <span class="badge bg-danger">Tidak Tersedia</span>
@@ -131,8 +131,7 @@
                     </table>
                 </div>
 
-
-                <div class="text-end mt-3">
+                <div class="text-end mt-3 mb-3">
                     {{-- Tombol Ganti Oli --}}
                     <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#oilChangeModal">
                         Ganti Oli
@@ -143,7 +142,6 @@
                             Edit Kendaraan
                         </a>
                     @endif
-                </div>
                 {{-- ======================= --}}
                 {{-- MODAL GANTI OLI --}}
                 {{-- ======================= --}}
@@ -182,6 +180,42 @@
                 </div>
 
             </div>
+                            <div>
+
+                    @if($vehicle->status === 'available')
+                        {{-- Link untuk menonaktifkan --}}
+                        <a href="#"
+                            class="text-danger text-decoration-underline"
+                            onclick="event.preventDefault();
+                                    document.getElementById('disable-form').submit();">
+                            Klik disini untuk menonaktifkan kendaraan jika sedang perbaikan
+                        </a>
+
+                        <form id="disable-form"
+                            action="{{ route('vehicles.disable', $vehicle->id) }}"
+                            method="POST"
+                            style="display: none;">
+                            @csrf
+                        </form>
+
+                    @elseif($vehicle->status === 'unavailable')
+                        {{-- Link untuk mengaktifkan kembali --}}
+                        <a href="#"
+                            class="text-success text-decoration-underline"
+                            onclick="event.preventDefault();
+                                    document.getElementById('enable-form').submit();">
+                            Klik untuk mengaktifkan kembali kendaraan
+                        </a>
+
+                        <form id="enable-form"
+                            action="{{ route('vehicles.enable', $vehicle->id) }}"
+                            method="POST"
+                            style="display: none;">
+                            @csrf
+                        </form>
+                    @endif
+
+                </div>
 
         </div>
     </div>

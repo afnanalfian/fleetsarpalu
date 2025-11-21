@@ -102,17 +102,18 @@ Route::middleware('auth')->group(function () {
     // ======================================================
     // ⭕ VEHICLES
     // ======================================================
-    Route::middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])->group(function () {
-        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
-        Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->name('vehicles.show');
-        Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
-    });
-
     Route::middleware(['userAccess:admin,kepala sumber daya'])->group(function () {
         Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create');
         Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
         Route::get('/vehicles/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicles.edit');
         Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+        Route::post('/vehicles/{id}/disable', [VehicleController::class, 'disable'])->name('vehicles.disable');
+        Route::post('/vehicles/{id}/enable', [VehicleController::class, 'enable'])->name('vehicles.enable');
+    });
+    Route::middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai'])->group(function () {
+        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->name('vehicles.show');
+        Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
     });
 
     Route::post('/vehicles/{id}/oil-change', [OilChangeController::class, 'store'])

@@ -87,4 +87,18 @@ class VehicleController extends Controller
         return redirect()->route('vehicles.index')
             ->with('success', 'Kendaraan berhasil dihapus.');
     }
+    public function disable($id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->update(['status' => 'unavailable']);
+
+        return back()->with('success', 'Kendaraan berhasil dinonaktifkan.');
+    }
+    public function enable($id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->update(['status' => 'available']);
+
+        return back()->with('success', 'Kendaraan berhasil diaktifkan kembali.');
+    }
 }

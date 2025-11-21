@@ -15,7 +15,7 @@
             // Ambil hanya 5 notifikasi terbaru untuk dropdown
             $notifs = App\Models\Notification::where('user_id', auth()->id())
                 ->latest()
-                ->limit(5)
+                ->limit(10)
                 ->get();
         @endphp
 

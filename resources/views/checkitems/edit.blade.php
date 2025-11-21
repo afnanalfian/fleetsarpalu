@@ -142,6 +142,33 @@
                                 </div>
                             </div>
                         </div>
+                        <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+
+                            @foreach($items as $key => $label)
+                                const okField{{ $key }}1 = document.getElementById("{{ $key }}_ok1"); // Aman
+                                const okField{{ $key }}0 = document.getElementById("{{ $key }}_ok0"); // Tidak Aman
+                                const noteField{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
+
+                                function updateRequirement{{ $key }}() {
+                                    if (okField{{ $key }}0.checked) {
+                                        noteField{{ $key }}.setAttribute("required", "required");
+                                        noteField{{ $key }}.placeholder = "Wajib diisi jika tidak aman";
+                                    } else {
+                                        noteField{{ $key }}.removeAttribute("required");
+                                        noteField{{ $key }}.placeholder = "Catatan (opsional)";
+                                    }
+                                }
+
+                                okField{{ $key }}1.addEventListener('change', updateRequirement{{ $key }});
+                                okField{{ $key }}0.addEventListener('change', updateRequirement{{ $key }});
+
+                                // Set initial state (penting saat edit data dan saat error validation)
+                                updateRequirement{{ $key }}();
+                            @endforeach
+
+                        });
+                        </script>
 
                     @endforeach
 

@@ -66,10 +66,7 @@ class BorrowRequest extends Model
             $this->update(['status' => 'In Use']);
         }
 
-        // === In Use → Overdue (Waktu peminjaman telah lewat) ===
         if ($this->status === 'In Use' && $now->greaterThan($end)) {
-
-            $this->update(['status' => 'Overdue']);
 
             // Kirim notif ke PEMINJAM
             notify(
