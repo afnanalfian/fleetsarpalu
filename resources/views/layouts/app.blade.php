@@ -15,7 +15,7 @@
     <main class="content">
         @include('layouts.header')
 
-        <div class="p-4">
+        <div class="p-0">
             @yield('content')
         </div>
 
