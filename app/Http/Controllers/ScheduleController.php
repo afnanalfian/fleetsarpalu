@@ -63,11 +63,11 @@ class ScheduleController extends Controller
 
         // SEED SESUAI NAMA TEAM DI DATABASE
         $seed = [
-            'Tim Alpha'   => ['S1' => 3,  'S2' => 4],
-            'Tim Bravo'   => ['S1' => 2,  'S2' => 3],
-            'Tim Charlie' => ['S1' => 1,  'S2' => 2],
-            'Tim Delta'   => ['S1' => 31, 'S2' => 1], // S1 ada di 31 Okt
-            'Tim Echo'    => ['S1' => 4,  'S2' => 5],
+            'ALFA'   => ['S1' => 3,  'S2' => 4],
+            'BRAVO'   => ['S1' => 2,  'S2' => 3],
+            'CHARLIE' => ['S1' => 1,  'S2' => 2],
+            'DELTA'   => ['S1' => 31, 'S2' => 1], // S1 ada di 31 Okt
+            'ECHO'    => ['S1' => 4,  'S2' => 5],
         ];
 
         // Delete existing schedule for this month
