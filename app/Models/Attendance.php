@@ -13,8 +13,10 @@ class Attendance extends Model
         'check_id',
         'user_id',
         'status',
+        'bukti_path',
         'replacement_user_id',
         'is_replacement',
+        'replacement_for',
         'notes',
     ];
 
@@ -36,6 +38,10 @@ class Attendance extends Model
     public function replacement()
     {
         return $this->belongsTo(User::class, 'replacement_user_id');
+    }
+    public function replacedFor()
+    {
+        return $this->belongsTo(User::class, 'replacement_for');
     }
 
 }

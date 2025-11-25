@@ -42,7 +42,7 @@
 
                                         {{-- Status --}}
                                         <td>
-                                            <select name="status_{{ $member->id }}" class="form-select">
+                                            <select name="status_{{ $member->id }}" class="form-select status-select" data-id="{{ $member->id }}">
                                                 @foreach(['Hadir','Sakit','Izin','Cuti','Tanpa Keterangan'] as $opt)
                                                     <option value="{{ $opt }}" {{ $att && $att->status == $opt ? 'selected' : '' }}>
                                                         {{ $opt }}
@@ -78,13 +78,11 @@
                                         {{-- Pengganti --}}
                                         <td class="text-center">
 
-                                            {{-- hidden input --}}
                                             <input type="hidden"
                                                 name="replacement_{{ $member->id }}"
                                                 id="replacement_{{ $member->id }}"
-                                                value="{{ $att->replacement_id ?? '' }}">
+                                                value="{{ $att->replacement_user_id ?? '' }}">
 
-                                            {{-- tombol pilih --}}
                                             <button type="button"
                                                     class="btn btn-sm btn-warning open-replacement"
                                                     data-member="{{ $member->id }}"
@@ -95,18 +93,15 @@
                                             </button>
 
                                             <div id="replacement_wrap_{{ $member->id }}" class="small mt-1">
-
-                                                {{-- nama pengganti --}}
                                                 <span id="replacement_name_{{ $member->id }}" class="text-success">
                                                     @if($att && $att->replacement)
                                                         Pengganti: <strong>{{ $att->replacement->name }}</strong>
                                                     @endif
                                                 </span>
 
-                                                {{-- tombol hapus --}}
                                                 <button type="button"
                                                         class="btn btn-sm btn-danger ms-2 remove-replacement
-                                                        {{ ($att && $att->replacement_id) ? '' : 'd-none' }}"
+                                                            {{ ($att && $att->replacement_id) ? '' : 'd-none' }}"
                                                         data-member="{{ $member->id }}">
                                                     x
                                                 </button>
@@ -122,37 +117,43 @@
 
                     <button type="submit" class="btn btn-primary mt-3">Perbarui Absensi</button>
                     <script>
-                    document.querySelectorAll('.status-select').forEach(select => {
-                        select.addEventListener('change', function () {
-                            const id = this.dataset.id;
+                    document.addEventListener("DOMContentLoaded", () => {
 
-                            // tombol pilih pengganti
-                            const btn = document.querySelector(`[data-replace-btn="${id}"]`);
+                        // === HANDLE STATUS SELECT ===
+                        document.querySelectorAll('.status-select').forEach(select => {
+                            select.addEventListener('change', function () {
+                                const id = this.dataset.id;
 
-                            if (btn) {
-                                btn.disabled = (this.value === "Hadir");
-                            }
+                                // tombol pilih pengganti
+                                const btn = document.querySelector(`[data-replace-btn="${id}"]`);
+                                const removeBtn = document.querySelector(`.remove-replacement[data-member="${id}"]`);
 
-                            // kalau status jadi Hadir → hapus pengganti
-                            if (this.value === "Hadir") {
+                                // disable/enable tombol pilih
+                                if (btn) {
+                                    btn.disabled = (this.value === "Hadir");
+                                }
+
+                                // kalau status jadi Hadir → hapus pengganti
+                                if (this.value === "Hadir") {
+                                    document.getElementById("replacement_" + id).value = "";
+                                    document.getElementById("replacement_name_" + id).innerHTML = "";
+                                    if (removeBtn) removeBtn.classList.add("d-none");
+                                }
+                            });
+                        });
+
+                        // === HANDLE TOMBOL HAPUS ===
+                        document.querySelectorAll('.remove-replacement').forEach(btn => {
+                            btn.addEventListener('click', function () {
+                                const id = this.dataset.member;
+
                                 document.getElementById("replacement_" + id).value = "";
                                 document.getElementById("replacement_name_" + id).innerHTML = "";
-                                const removeBtn = document.querySelector(`.remove-replacement[data-member="${id}"]`);
-                                removeBtn.classList.add("d-none");
-                            }
+
+                                this.classList.add("d-none");
+                            });
                         });
-                    });
 
-                    // tombol HAPUS pada edit
-                    document.querySelectorAll('.remove-replacement').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const id = this.dataset.member;
-
-                            document.getElementById("replacement_" + id).value = "";
-                            document.getElementById("replacement_name_" + id).innerHTML = "";
-
-                            this.classList.add("d-none");
-                        });
                     });
                     </script>
 

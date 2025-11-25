@@ -78,6 +78,7 @@ class AttendanceController extends Controller
                 'bukti_path'          => $buktiPath,
                 'replacement_user_id' => $request->input($replacementField),
                 'is_replacement'      => false,
+                'replacement_for' => null,
             ]);
             // ======== JIKA ADA PENGGANTI ========
             if (!$isPresent && $request->filled($replacementField)) {
@@ -90,7 +91,8 @@ class AttendanceController extends Controller
                     'status'         => 'Hadir',
                     'notes'          => "Pengganti untuk {$member->name}",
                     'is_replacement' => true,
-                    'bukti_path'     => null, // tidak perlu bukti untuk pengganti
+                    'replacement_for' => $member->id,
+                    'bukti_path'     => null,
                 ]);
 
                 // KIRIM NOTIF KE PENGGANTI
@@ -196,7 +198,7 @@ class AttendanceController extends Controller
                 // Jika hadir → hapus pengganti lama jika ada
                 Attendance::where('check_id', $check_id)
                     ->where('is_replacement', true)
-                    ->where('notes', "Pengganti untuk {$member->name}")
+                    ->where('replacement_for', $member->id)
                     ->delete();
 
                 $attendance->update([
@@ -213,11 +215,22 @@ class AttendanceController extends Controller
             // Jika ada perubahan pengganti
             if ($chosenReplacement != $oldReplacement) {
 
-                // Hapus pengganti lama
-                Attendance::where('check_id', $check_id)
+            // Hapus pengganti lama hanya jika ada ID lama
+            if ($oldReplacement) {
+
+                // Pastikan tidak digunakan anggota lain
+                $stillUsed = Attendance::where('check_id', $check_id)
+                    ->where('replacement_for', '!=', $member->id)
                     ->where('user_id', $oldReplacement)
-                    ->where('is_replacement', true)
-                    ->delete();
+                    ->exists();
+
+                if (!$stillUsed) {
+                    Attendance::where('check_id', $check_id)
+                        ->where('user_id', $oldReplacement)
+                        ->where('is_replacement', true)
+                        ->delete();
+                }
+            }
 
                 $attendance->update([
                     'replacement_user_id' => $chosenReplacement,
@@ -233,9 +246,8 @@ class AttendanceController extends Controller
                         'check_id'       => $check_id,
                         'user_id'        => $chosenReplacement,
                         'status'         => 'Hadir',
-                        'notes'          => "Pengganti untuk {$member->name}",
-                        'is_replacement' => true,
-                        'bukti_path'     => null
+                        'is_replacement'  => true,
+                        'replacement_for' => $member->id,
                     ]);
 
                     // Kirim notif

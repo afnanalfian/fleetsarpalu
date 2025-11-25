@@ -68,7 +68,8 @@
                                                     class="btn btn-sm btn-warning open-replacement"
                                                     data-member="{{ $member->id }}"
                                                     data-replace-btn="{{ $member->id }}"
-                                                    onclick="openReplacementModal({{ $member->id }})">
+                                                    onclick="openReplacementModal({{ $member->id }})"
+                                                    disabled>
                                                 Pilih
                                             </button>
 
