@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,6 +14,25 @@ return new class extends Migration
          * CHECK ITEMS
          * ============================
          */
+        // Reset all non-enum values to NULL before changing structure
+        DB::statement("
+            UPDATE check_items SET
+                radiator_ok = NULL,
+                air_filter_ok = NULL,
+                wiper_ok = NULL,
+                lights_ok = NULL,
+                leaks_ok = NULL,
+                hazards_ok = NULL,
+                horn_ok = NULL,
+                siren_ok = NULL,
+                tires_ok = NULL,
+                brakes_ok = NULL,
+                battery_ok = NULL,
+                start_engine_ok = NULL,
+                glass_cleanliness_ok = NULL,
+                body_cleanliness_ok = NULL,
+                interior_cleanliness_ok = NULL
+        ");
         Schema::table('check_items', function (Blueprint $table) {
 
             // Mekanis: 3 kondisi
