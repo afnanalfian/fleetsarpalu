@@ -15,6 +15,7 @@ return new class extends Migration
          * ============================
          */
         // Reset all non-enum values to NULL before changing structure
+        DB::statement("UPDATE check_items SET `condition` = 'Baik' WHERE `condition` NOT IN ('Baik','Rusak Ringan','Rusak Berat');");
         DB::statement("
             UPDATE check_items SET
                 radiator_ok = NULL,
