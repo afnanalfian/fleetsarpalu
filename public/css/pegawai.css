@@ -1,0 +1,146 @@
+:root {
+    --light: #f3f6f9;
+    --primary: #6ac8e4;
+    --primary-hover: #27b1e8;
+    --black: #0f0f0f;
+    --white: #fff;
+}
+
+.h-80vh {
+    height: 80vh;
+}
+
+.h-90vh {
+    height: 90vh;
+}
+
+.w-40px {
+    width: 40px;
+}
+
+.w-90px {
+    width: 90px;
+}
+
+.w-70 {
+    width: 70%;
+}
+
+.bg-light {
+    background-color: var(--light);
+
+}
+
+body {
+    background-color: var(--primary);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 .2rem var(--primary);
+    border-color: var(--primary);
+}
+
+.car-icon {
+    font-size: 18px;
+}
+
+.btn-close:focus {
+    box-shadow: 0 0 0 .2rem var(--primary);
+}
+
+.btn:disabled {
+    background-color: var(--primary);
+    border-color: var(--primary-hover);
+}
+
+/* pagination custom */
+.pagination {
+    margin-top: 20px;
+}
+
+.page-link.active,
+.active>.page-link {
+    background-color: var(--primary);
+    border-color: var(--primary-hover);
+}
+
+.page-item:active>.page-link,
+.page-link:focus {
+    background-color: var(--white);
+    box-shadow: 0 0 0 .2rem var(--primary) !important;
+    color: var(--black);
+}
+
+a.page-link {
+    color: var(--black);
+}
+
+.page-link:hover {
+    color: var(--primary-hover);
+}
+
+.page-link:focus {
+    color: var(--black);
+}
+
+.btn-primary {
+    color: var(--black);
+    background-color: var(--primary);
+    border-color: var(--primary)
+}
+
+.btn-primary:hover {
+    color: var(--black);
+    background-color: var(--primary-hover);
+    border-color: var(--primary);
+}
+
+.btn-primary.focus,
+.btn-primary:focus {
+    color: var(--black);
+    background-color: var(--primary);
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 0 .2rem var(--primary-hover)
+}
+
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.show>.btn-primary.dropdown-toggle {
+    color: var(--black);
+    background-color: var(--primary);
+    border-color: var(--primary-hover);
+}
+
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.show>.btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 .2rem var(--primary-hover);
+}
+
+.dropdown-item:active {
+    background-color: var(--primary);
+}
+
+@media (min-width: 1920px) {
+    .h-80vh {
+        height: 50vh;
+    }
+
+    .h-90vh {
+        height: 60vh;
+    }
+
+    .w-70 {
+        width: 50%;
+    }
+}
+
+@media (max-width: 400px) {
+    .w-70 {
+        width: 90%;
+    }
+}

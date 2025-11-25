@@ -1,0 +1,30 @@
+/**
+ * @package PHPFlasher
+ * @author Younes ENNAJI
+ * @license MIT
+ */
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('@flasher/flasher')) :
+    typeof define === 'function' && define.amd ? define(['@flasher/flasher'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.flasher));
+})(this, (function (flasher) { 'use strict';
+
+    const emeraldTheme = {
+        render: (envelope) => {
+            const { type, message } = envelope;
+            const isAlert = type === 'error' || type === 'warning';
+            const role = isAlert ? 'alert' : 'status';
+            const ariaLive = isAlert ? 'assertive' : 'polite';
+            return `
+            <div class="fl-emerald fl-${type}" role="${role}" aria-live="${ariaLive}" aria-atomic="true">
+                <div class="fl-content">
+                    <div class="fl-message">${message}</div>
+                    <button class="fl-close" aria-label="Close ${type} message">×</button>
+                </div>
+            </div>`;
+        },
+    };
+
+    flasher.addTheme('emerald', emeraldTheme);
+
+}));
