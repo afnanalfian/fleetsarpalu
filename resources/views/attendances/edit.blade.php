@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Absensi Pengecekan')
+@section('title', 'Edit Absensi')
 
 @section('content')
 <div class="container-fluid pt-4 px-4">
@@ -15,12 +15,8 @@
                 </div>
 
                 <h4 class="fw-bold">Edit Absensi Pengecekan Kendaraan</h4>
-                <p class="mb-3">Tim: <strong>{{ $checking->team->name }}</strong></p>
-                <p class="mb-3">Tanggal: <strong>{{ $checking->created_at->format('d M Y') }}</strong></p>
 
-                <form action="{{ route('attendances.update', $checking->id) }}"
-                      method="POST"
-                      enctype="multipart/form-data">
+                <form action="{{ route('attendances.update', $checking->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -28,50 +24,45 @@
                         <table class="table table-bordered align-middle">
                             <thead class="table-secondary">
                                 <tr>
-                                    <th>Nama Anggota</th>
-                                    <th class="text-center">Hadir?</th>
-                                    <th>Alasan</th>
-                                    <th>Bukti Sebelumnya</th>
-                                    <th>Upload Bukti Baru</th>
+                                    <th>Nama</th>
+                                    <th>Status</th>
+                                    <th>Catatan</th>
+                                    <th>Bukti Lama</th>
+                                    <th>Bukti Baru</th>
+                                    <th>Pengganti</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 @foreach($members as $member)
-                                    @php
-                                        $att = $attendanceMap[$member->id] ?? null;
-                                    @endphp
+                                    @php $att = $attendanceMap[$member->id] ?? null; @endphp
 
                                     <tr>
                                         <td>{{ $member->name }}</td>
 
-                                        {{-- Hadir --}}
-                                        <td class="text-center">
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                <input type="checkbox"
-                                                       class="form-check-input"
-                                                       name="present_{{ $member->id }}"
-                                                       value="1"
-                                                       {{ $att && $att->present ? 'checked' : '' }}>
-                                            </div>
+                                        {{-- Status --}}
+                                        <td>
+                                            <select name="status_{{ $member->id }}" class="form-select">
+                                                @foreach(['Hadir','Sakit','Izin','Cuti','Tanpa Keterangan'] as $opt)
+                                                    <option value="{{ $opt }}" {{ $att && $att->status == $opt ? 'selected' : '' }}>
+                                                        {{ $opt }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </td>
 
-                                        {{-- Alasan --}}
+                                        {{-- Catatan --}}
                                         <td>
-                                            <input type="text"
-                                                   name="reason_{{ $member->id }}"
+                                            <input type="text" name="notes_{{ $member->id }}"
                                                    class="form-control"
-                                                   value="{{ $att->reason ?? '' }}"
-                                                   placeholder="Isi alasan jika tidak hadir">
+                                                   value="{{ $att->notes ?? '' }}">
                                         </td>
 
                                         {{-- Bukti Lama --}}
                                         <td>
                                             @if($att && $att->bukti_path)
                                                 <a href="{{ asset('storage/'.$att->bukti_path) }}" target="_blank"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    Lihat Bukti
-                                                </a>
+                                                   class="btn btn-sm btn-outline-primary">Lihat</a>
                                             @else
                                                 <span class="text-muted">Tidak ada</span>
                                             @endif
@@ -79,22 +70,91 @@
 
                                         {{-- Upload Baru --}}
                                         <td>
-                                            <input type="file"
+                                            <input type="file" class="form-control"
                                                    name="bukti_{{ $member->id }}"
-                                                   class="form-control"
                                                    accept="image/*,application/pdf">
                                         </td>
+
+                                        {{-- Pengganti --}}
+                                        <td class="text-center">
+
+                                            {{-- hidden input --}}
+                                            <input type="hidden"
+                                                name="replacement_{{ $member->id }}"
+                                                id="replacement_{{ $member->id }}"
+                                                value="{{ $att->replacement_id ?? '' }}">
+
+                                            {{-- tombol pilih --}}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-warning open-replacement"
+                                                    data-member="{{ $member->id }}"
+                                                    data-replace-btn="{{ $member->id }}"
+                                                    onclick="openReplacementModal({{ $member->id }})"
+                                                    {{ ($att && $att->status === 'Hadir') ? 'disabled' : '' }}>
+                                                Pilih
+                                            </button>
+
+                                            <div id="replacement_wrap_{{ $member->id }}" class="small mt-1">
+
+                                                {{-- nama pengganti --}}
+                                                <span id="replacement_name_{{ $member->id }}" class="text-success">
+                                                    @if($att && $att->replacement)
+                                                        Pengganti: <strong>{{ $att->replacement->name }}</strong>
+                                                    @endif
+                                                </span>
+
+                                                {{-- tombol hapus --}}
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger ms-2 remove-replacement
+                                                        {{ ($att && $att->replacement_id) ? '' : 'd-none' }}"
+                                                        data-member="{{ $member->id }}">
+                                                    x
+                                                </button>
+                                            </div>
+
+                                        </td>
                                     </tr>
+
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="text-start mt-3">
-                        <button type="submit" class="btn btn-primary">
-                            Perbarui Absensi
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Perbarui Absensi</button>
+                    <script>
+                    document.querySelectorAll('.status-select').forEach(select => {
+                        select.addEventListener('change', function () {
+                            const id = this.dataset.id;
+
+                            // tombol pilih pengganti
+                            const btn = document.querySelector(`[data-replace-btn="${id}"]`);
+
+                            if (btn) {
+                                btn.disabled = (this.value === "Hadir");
+                            }
+
+                            // kalau status jadi Hadir → hapus pengganti
+                            if (this.value === "Hadir") {
+                                document.getElementById("replacement_" + id).value = "";
+                                document.getElementById("replacement_name_" + id).innerHTML = "";
+                                const removeBtn = document.querySelector(`.remove-replacement[data-member="${id}"]`);
+                                removeBtn.classList.add("d-none");
+                            }
+                        });
+                    });
+
+                    // tombol HAPUS pada edit
+                    document.querySelectorAll('.remove-replacement').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const id = this.dataset.member;
+
+                            document.getElementById("replacement_" + id).value = "";
+                            document.getElementById("replacement_name_" + id).innerHTML = "";
+
+                            this.classList.add("d-none");
+                        });
+                    });
+                    </script>
 
                 </form>
 
@@ -102,4 +162,7 @@
         </div>
     </div>
 </div>
+
+@include('attendances.modal-replacement')
+
 @endsection

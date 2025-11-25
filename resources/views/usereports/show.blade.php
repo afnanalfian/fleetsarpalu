@@ -77,6 +77,12 @@
                             'battery' => 'Aki',
                             'start_engine' => 'Mesin',
                         ];
+
+                        $badgeClass = [
+                            'Baik'         => 'bg-success',
+                            'Rusak Ringan' => 'bg-warning text-dark',
+                            'Rusak Berat'  => 'bg-danger',
+                        ];
                     @endphp
 
                     <div class="table-responsive">
@@ -88,27 +94,32 @@
                                     <th>Catatan</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 @foreach($items as $key => $label)
                                     @php
-                                        $ok = $report[$key.'_ok'] ?? null;
+                                        $condition = $report[$key.'_ok'] ?? null;
                                         $note = $report[$key.'_note'] ?? '-';
                                     @endphp
+
                                     <tr>
                                         <td><strong>{{ strtoupper($label) }}</strong></td>
+
                                         <td class="text-center">
-                                            @if($ok === 1)
-                                                <span class="badge bg-success">Aman</span>
-                                            @elseif($ok === 0)
-                                                <span class="badge bg-danger">Tidak Aman</span>
+                                            @if($condition)
+                                                <span class="badge {{ $badgeClass[$condition] ?? 'bg-secondary' }}">
+                                                    {{ $condition }}
+                                                </span>
                                             @else
                                                 <span class="badge bg-secondary">-</span>
                                             @endif
                                         </td>
+
                                         <td>{{ $note ?: '-' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
+
                         </table>
                     </div>
                 </div>

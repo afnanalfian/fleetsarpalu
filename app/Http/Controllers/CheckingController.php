@@ -17,11 +17,23 @@ class CheckingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Check::with('team')->orderBy('scheduled_date', 'desc');
         $user = auth()->user();
-        if (in_array(strtolower($user->role), ['pegawai', 'ketua tim'])) {
-            $query->where('team_id', $user->team_id);
-        }
+
+        $query = Check::with('team')
+            ->orderBy('scheduled_date', 'desc')
+            ->where(function ($q) use ($user) {
+
+                // 1. Jika pegawai atau ketua tim → hanya pengecekan tim nya
+                if (in_array(strtolower($user->role), ['pegawai', 'ketua tim'])) {
+                    $q->where('team_id', $user->team_id);
+                }
+
+                // 2. Tambahkan pengecekan yang dia menjadi PENGGANTI
+                $q->orWhereHas('attendances', function ($att) use ($user) {
+                    $att->where('user_id', $user->id)
+                        ->where('is_replacement', true);
+                });
+            });
 
         // Filter berdasarkan bulan & tahun
         if ($request->filled('bulan') && $request->filled('tahun')) {
@@ -104,8 +116,17 @@ class CheckingController extends Controller
         // Ambil data pengecekan
         $check = Check::findOrFail($id);
 
-        if (!auth()->user()->isSameTeam($check->team_id)) {
-            abort(403, 'Tidak boleh mengakses pengecekan milik tim lain.');
+        // Cek apakah user adalah anggota tim
+        $isTeamMember = auth()->user()->isSameTeam($check->team_id);
+
+        // Cek apakah user adalah pengganti
+        $isReplacement = Attendance::where('check_id', $id)
+            ->where('user_id', auth()->id())
+            ->where('is_replacement', true)
+            ->exists();
+
+        if (!$isTeamMember && !$isReplacement) {
+            abort(403, 'Anda tidak memiliki akses ke pengecekan ini.');
         }
 
         // Ambil absensi pengecekan

@@ -87,9 +87,12 @@
                             <td>
                                 @php
                                     $condition = 'Not Yet';
+
                                     if ($borrow->status === 'Completed' && $borrow->useReport) {
                                         $report = $borrow->useReport;
-                                        $checklist = [
+
+                                        // Komponen mekanik saja (kebersihan tidak dihitung)
+                                        $mechanicalItems = [
                                             $report->hazards_ok,
                                             $report->horn_ok,
                                             $report->siren_ok,
@@ -98,14 +101,26 @@
                                             $report->battery_ok,
                                             $report->start_engine_ok,
                                         ];
-                                        $condition = in_array(0, $checklist) ? 'Tidak Aman' : 'Aman';
+
+                                        if (in_array('Rusak Berat', $mechanicalItems)) {
+                                            $condition = 'Rusak Berat';
+                                        } elseif (in_array('Rusak Ringan', $mechanicalItems)) {
+                                            $condition = 'Rusak Ringan';
+                                        } else {
+                                            $condition = 'Baik';
+                                        }
                                     }
+
+                                    // Badge warna
+                                    $badge = [
+                                        'Baik'         => 'bg-success',
+                                        'Rusak Ringan' => 'bg-warning text-dark',
+                                        'Rusak Berat'  => 'bg-danger',
+                                        'Not Yet'      => 'bg-secondary'
+                                    ];
                                 @endphp
 
-                                <span class="badge
-                                    @if($condition == 'Aman') bg-success
-                                    @elseif($condition == 'Tidak Aman') bg-danger
-                                    @else bg-secondary @endif">
+                                <span class="badge {{ $badge[$condition] ?? 'bg-secondary' }}">
                                     {{ $condition }}
                                 </span>
                             </td>

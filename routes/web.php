@@ -21,7 +21,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BorrowReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ExternalAuthController;
-use App\Http\Controllers\SocialAuthController;
 
 
 // ======================================================
@@ -143,14 +142,11 @@ Route::middleware('auth')->group(function () {
     // ======================================================
     Route::resource('/borrowings', BorrowingController::class)
         ->middleware(['userAccess:admin,kepala sumber daya,ketua tim,pegawai,external']);
-
     Route::patch('/borrowings/{id}/cancel', [BorrowingController::class, 'cancel'])
         ->name('borrowings.cancel');
-
     Route::post('/borrowings/{id}/approve', [BorrowingController::class, 'approve'])
         ->middleware(['userAccess:admin,kepala sumber daya'])
         ->name('borrowings.approve');
-
     Route::post('/borrowings/{id}/reject', [BorrowingController::class, 'reject'])
         ->middleware(['userAccess:admin,kepala sumber daya'])
         ->name('borrowings.reject');
@@ -229,6 +225,12 @@ Route::middleware('auth')->group(function () {
             ->middleware('userAccess:pegawai,ketua tim')
             ->name('checkitems.destroy');
     });
+
+    // ======================================================
+    // ⭕ SEARCH PENGGANTI (Harus bisa dipanggil via AJAX)
+    // ======================================================
+    Route::get('/attendances/search-replacement',[AttendanceController::class, 'searchReplacement'])
+        ->name('attendances.searchReplacement');
 
 
     // ======================================================

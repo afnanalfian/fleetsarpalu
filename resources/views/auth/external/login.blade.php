@@ -67,7 +67,7 @@
 
                         {{-- Submit --}}
                         <div class="pt-1 mb-3">
-                            <button class="button shadow-sm btn w-100 fw-semibold" type="submit">
+                            <button class="button shadow-sm btn btn-warning w-100 fw-semibold" type="submit">
                                 Masuk
                             </button>
                         </div>

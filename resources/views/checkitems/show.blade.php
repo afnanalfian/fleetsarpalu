@@ -53,13 +53,15 @@
                     <thead>
                         <tr>
                             <th>Item</th>
-                            <th>Aman?</th>
+                            <th>Kondisi</th>
                             <th>Catatan</th>
                         </tr>
                     </thead>
                     <tbody>
+
                         @php
                             $items = [
+                                // Mekanikal
                                 'radiator' => 'Radiator',
                                 'air_filter' => 'Filter Udara',
                                 'wiper' => 'Wiper',
@@ -72,25 +74,58 @@
                                 'brakes' => 'Rem',
                                 'battery' => 'Aki',
                                 'start_engine' => 'Mesin',
+
+                                // Kebersihan
                                 'glass_cleanliness' => 'Kaca',
                                 'body_cleanliness' => 'Body',
                                 'interior_cleanliness' => 'Interior'
                             ];
+
+                            $mechanical = [
+                                'Baik' => 'bg-success',
+                                'Rusak Ringan' => 'bg-warning text-dark',
+                                'Rusak Berat' => 'bg-danger',
+                            ];
+
+                            $cleanliness = [
+                                'Bersih' => 'bg-success',
+                                'Tidak Bersih' => 'bg-danger',
+                            ];
                         @endphp
 
                         @foreach($items as $key => $label)
+                            @php
+                                $value = $item->{$key.'_ok'} ?? null;
+                                $note  = $item->{$key.'_note'} ?: '-';
+
+                                // Tentukan apakah ini kelompok kebersihan
+                                $isCleanliness = str_contains($key, 'cleanliness');
+
+                                // Tentukan badge
+                                if ($isCleanliness) {
+                                    $badgeClass = $cleanliness[$value] ?? 'bg-secondary';
+                                } else {
+                                    $badgeClass = $mechanical[$value] ?? 'bg-secondary';
+                                }
+                            @endphp
+
                             <tr>
                                 <td>{{ $label }}</td>
+
+                                {{-- Kondisi --}}
                                 <td>
-                                    @if($item->{$key.'_ok'} == 1)
-                                        <span class="badge bg-success">Aman</span>
+                                    @if($value)
+                                        <span class="badge {{ $badgeClass }}">{{ $value }}</span>
                                     @else
-                                        <span class="badge bg-danger">Tidak Aman</span>
+                                        <span class="badge bg-secondary">-</span>
                                     @endif
                                 </td>
-                                <td>{{ $item->{$key.'_note'} ?: '-' }}</td>
+
+                                {{-- Catatan --}}
+                                <td>{{ $note }}</td>
                             </tr>
                         @endforeach
+
                     </tbody>
                 </table>
 

@@ -69,34 +69,21 @@ class CheckItem extends Model
      */
     public function evaluateCondition()
     {
-        // Ambil semua kolom yang diakhiri dengan _ok
-        $okColumns = [
-            'radiator_ok',
-            'air_filter_ok',
-            'wiper_ok',
-            'lights_ok',
-            'leaks_ok',
-            'hazards_ok',
-            'horn_ok',
-            'siren_ok',
-            'tires_ok',
-            'brakes_ok',
-            'battery_ok',
-            'start_engine_ok',
-            'glass_cleanliness_ok',
-            'body_cleanliness_ok',
-            'interior_cleanliness_ok',
+        $cols = [
+            'radiator_ok','air_filter_ok','wiper_ok','lights_ok','leaks_ok',
+            'hazards_ok','horn_ok','siren_ok','tires_ok','brakes_ok','battery_ok',
+            'start_engine_ok','glass_cleanliness_ok','body_cleanliness_ok','interior_cleanliness_ok'
         ];
 
-        // Cek apakah ada salah satu kolom yang != 1
-        foreach ($okColumns as $col) {
-            if ($this->{$col} != 1) {
-                $this->condition = 'Rusak';
-                return;
-            }
-        }
+        $values = collect($cols)->map(fn($c) => $this->$c);
 
-        // Jika lolos semua
-        $this->condition = 'Baik';
+        if ($values->contains('Rusak Berat')) {
+            $this->condition = 'Rusak Berat';
+        } elseif ($values->contains('Rusak Ringan')) {
+            $this->condition = 'Rusak Ringan';
+        } else {
+            $this->condition = 'Baik';
+        }
     }
+
 }

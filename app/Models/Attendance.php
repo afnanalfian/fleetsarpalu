@@ -12,8 +12,10 @@ class Attendance extends Model
     protected $fillable = [
         'check_id',
         'user_id',
-        'present',
-        'reason',
+        'status',
+        'replacement_user_id',
+        'is_replacement',
+        'notes',
     ];
 
     /**
@@ -31,4 +33,9 @@ class Attendance extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function replacement()
+    {
+        return $this->belongsTo(User::class, 'replacement_user_id');
+    }
+
 }

@@ -63,27 +63,24 @@ class UseReport extends Model
 
     /**
      * Helper untuk menentukan kondisi kendaraan
-     * Jika semua *_ok bernilai 1 → "Aman"
-     * Jika ada yang 0 → "Tidak Aman"
      */
     public function conditionSummary()
     {
         $checks = [
-            'hazards_ok',
-            'horn_ok',
-            'siren_ok',
-            'tires_ok',
-            'brakes_ok',
-            'battery_ok',
-            'start_engine_ok',
+            'hazards_ok','horn_ok','siren_ok','tires_ok',
+            'brakes_ok','battery_ok','start_engine_ok'
         ];
 
-        foreach ($checks as $check) {
-            if ($this->{$check} == 0 || $this->{$check} === false) {
-                return 'Tidak Aman';
-            }
+        $values = collect($checks)->map(fn($c) => $this->$c);
+
+        if ($values->contains('Rusak Berat')) {
+            return 'Rusak Berat';
         }
 
-        return 'Aman';
+        if ($values->contains('Rusak Ringan')) {
+            return 'Rusak Ringan';
+        }
+
+        return 'Baik';
     }
 }

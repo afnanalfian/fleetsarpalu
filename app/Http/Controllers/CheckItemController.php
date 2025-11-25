@@ -77,12 +77,10 @@ class CheckItemController extends Controller
 
         $data['photos'] = json_encode($photoPaths);
 
-        // Tentukan kondisi
-        $data['condition'] = collect($keys)->every(fn($k) => $data[$k . '_ok'] == 1)
-            ? 'Baik'
-            : 'Rusak';
 
         $item->update($data);
+        $item->evaluateCondition();
+        $item->save();
 
         /** --------------------------------------------------
          *  UPDATE OTOMATIS DATA VEHICLE (distance & fuel)

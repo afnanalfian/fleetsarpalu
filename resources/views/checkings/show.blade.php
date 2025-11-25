@@ -21,7 +21,7 @@
                 <h4 class="fw-bold mb-3">Detail Pengecekan</h4>
 
                 <div class="mb-3">
-                    <a href="{{ asset('storage/sop/SOP_Pengecekan_Rutin.pdf') }}"
+                    <a href="{{ asset('sop/SOP_Pengecekan_Rutin.pdf') }}"
                     class="btn btn-outline-primary btn-sm"
                     target="_blank">
                         <i class="fa-solid fa-file-pdf me-1"></i> Lihat SOP Pengecekan Rutin
@@ -58,7 +58,6 @@
                     </tr>
                 </table>
 
-
                 {{-- ========================== --}}
                 {{--        SECTION: ABSENSI     --}}
                 {{-- ========================== --}}
@@ -66,73 +65,95 @@
                 <h4 class="fw-bold mt-4">Absensi</h4>
 
                 @php
-                    $attendanceList = $check->attendances;   // hasMany
-                    $teamMembers    = $check->team->users;   // anggota tim
+                    $attendanceList = $check->attendances;
+                    $teamMembers    = $check->team->users;
                 @endphp
 
-                {{-- Jika belum ada absensi --}}
                 @if($attendanceList->isEmpty())
                     <p class="text-danger fst-italic">Absensi belum dibuat.</p>
+
                     @if(auth()->user()->role === 'Ketua Tim')
-                        <a href="{{ route('attendances.create', $check->id) }}"
-                        class="btn btn-primary btn-sm">
+                        <a href="{{ route('attendances.create', $check->id) }}" class="btn btn-primary btn-sm">
                             <i class="fa-solid fa-user-check me-1"></i> Buat Absensi
                         </a>
                     @endif
+
                 @else
-                    @php
-                        $presentCount = $attendanceList->where('present', 1)->count();
-                        $totalMembers = $teamMembers->count();
-                    @endphp
 
-                    <p class="fw-semibold">Hadir: {{ $presentCount }}/{{ $totalMembers }}</p>
-
-                    <table class="table table-sm table-bordered mt-2">
+                    <table class="table table-sm table-bordered mt-2 align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Nama</th>
-                                <th>Hadir?</th>
-                                <th>Alasan</th>
+                                <th>Status</th>
                                 <th>Bukti</th>
+                                <th>Pengganti</th>
+                                <th>Catatan</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($attendanceList as $a)
                                 <tr>
-                                    <td>{{ $a->user->name }}</td>
 
+                                    {{-- Nama anggota tim / atau nama pengganti --}}
                                     <td>
-                                        @if($a->present)
-                                            <span class="badge bg-success">Hadir</span>
-                                        @else
-                                            <span class="badge bg-danger">Tidak Hadir</span>
+                                        {{ $a->user->name }}
+                                        @if($a->is_replacement)
+                                            <span class="badge bg-info ms-1">Pengganti</span>
                                         @endif
                                     </td>
 
-                                    <td>{{ $a->reason ?: '-' }}</td>
+                                    {{-- Status --}}
+                                    <td>
+                                        <span class="badge
+                                            @if($a->status === 'Hadir') bg-success
+                                            @elseif(in_array($a->status, ['Sakit','Izin','Cuti'])) bg-warning
+                                            @else bg-danger @endif">
+                                            {{ $a->status }}
+                                        </span>
+                                    </td>
 
+                                    {{-- Bukti --}}
                                     <td>
                                         @if($a->bukti_path)
-                                            <a href="{{ asset('storage/' . $a->bukti_path) }}"
-                                            target="_blank" class="btn btn-info btn-sm">
-                                                Lihat
+                                            <a href="{{ asset('storage/'.$a->bukti_path) }}"
+                                            target="_blank"
+                                            class="btn btn-info btn-sm">
+                                                Lihat Bukti
                                             </a>
                                         @else
                                             -
                                         @endif
                                     </td>
+
+                                    {{-- Pengganti --}}
+                                    <td>
+                                        @if($a->replacement_user_id)
+                                            <span class="text-primary fw-semibold">
+                                                {{ $a->replacement->name }}
+                                            </span>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+
+                                    {{-- Catatan --}}
+                                    <td>
+                                        {{ $a->notes ?: '-' }}
+                                    </td>
+
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-                    @if(auth()->user()->role === 'Ketua Tim')
+
+                    @if(auth()->user()->role === 'Ketua Tim' && auth()->user()->team_id == $check->team_id)
                         <a href="{{ route('attendances.edit', $check->id) }}"
                         class="btn btn-warning btn-sm mt-2">
                             <i class="fa-solid fa-pen-to-square me-1"></i> Edit Absensi
                         </a>
                     @endif
-                @endif
 
+                @endif
 
 
                 {{-- ========================== --}}
@@ -181,11 +202,19 @@
 
                                     {{-- Tentukan kondisi --}}
                                     @php
-                                        $condition = $item->condition === 'Baik' ? 'bg-success' : 'bg-danger';
+                                        $value = $item->condition ?? null;
+
+                                        $badge = [
+                                            'Baik'         => 'bg-success',
+                                            'Rusak Ringan' => 'bg-warning text-dark',
+                                            'Rusak Berat'  => 'bg-danger',
+                                        ];
+
+                                        $badgeClass = $badge[$value] ?? 'bg-secondary';
                                     @endphp
 
-                                    <span class="badge {{ $condition }}">
-                                        {{ $item->condition }}
+                                    <span class="badge {{ $badgeClass }}">
+                                        {{ $value ?? '-' }}
                                     </span>
 
                                     <div class="mt-2">

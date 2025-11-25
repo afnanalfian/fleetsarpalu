@@ -74,39 +74,83 @@
                             'battery' => 'Aki',
                             'start_engine' => 'Mesin',
                         ];
+
+                        $conditionOptions = [
+                            'Baik'         => 'text-success',
+                            'Rusak Ringan' => 'text-warning',
+                            'Rusak Berat'  => 'text-danger'
+                        ];
                     @endphp
 
                     @foreach($items as $key => $label)
-                        <div class="col-md-12">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label w-100 text-start fw-bold text-uppercase">
                                 {{ $label }} <span class="text-danger">*</span>
                             </label>
 
                             <div class="d-flex flex-wrap align-items-center gap-3">
-                                {{-- Aman --}}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="{{ $key }}_ok" id="{{ $key }}_ok1" value="1"
-                                           {{ old($key.'_ok', $report->{$key.'_ok'}) == '1' ? 'checked' : '' }} required>
-                                    <label class="form-check-label fw-semibold text-success" for="{{ $key }}_ok1">AMAN</label>
-                                </div>
 
-                                {{-- Tidak Aman --}}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="{{ $key }}_ok" id="{{ $key }}_ok0" value="0"
-                                           {{ old($key.'_ok', $report->{$key.'_ok'}) == '0' ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-semibold text-danger" for="{{ $key }}_ok0">TIDAK AMAN</label>
-                                </div>
+                                @foreach($conditionOptions as $value => $color)
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                            type="radio"
+                                            name="{{ $key }}_ok"
+                                            id="{{ $key }}_ok_{{ $value }}"
+                                            value="{{ $value }}"
+                                            {{ old($key.'_ok', $report->{$key.'_ok'}) == $value ? 'checked' : '' }}
+                                            required>
+
+                                        <label class="form-check-label fw-semibold {{ $color }}"
+                                            for="{{ $key }}_ok_{{ $value }}">
+                                        {{ $value }}
+                                        </label>
+                                    </div>
+                                @endforeach
 
                                 {{-- Catatan --}}
                                 <div class="flex-grow-1">
-                                    <input type="text" name="{{ $key }}_note"
-                                           class="form-control @error($key.'_note') is-invalid @enderror"
-                                           placeholder="Catatan (opsional)"
-                                           value="{{ old($key.'_note', $report->{$key.'_note'}) }}">
+                                    <input type="text"
+                                        name="{{ $key }}_note"
+                                        class="form-control @error($key.'_note') is-invalid @enderror"
+                                        placeholder="Catatan (opsional)"
+                                        value="{{ old($key.'_note', $report->{$key.'_note'}) }}">
                                 </div>
                             </div>
                         </div>
                     @endforeach
+
+                    {{-- SCRIPT WAJIB CATATAN UNTUK RUSAK --}}
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        @foreach($items as $key => $label)
+
+                            const radios_{{ $key }} = document.querySelectorAll("input[name='{{ $key }}_ok']");
+                            const noteField_{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
+
+                            function updateRequirement_{{ $key }}() {
+                                let selected = document.querySelector("input[name='{{ $key }}_ok']:checked");
+
+                                if (!selected) return;
+
+                                if (selected.value === "Rusak Ringan" || selected.value === "Rusak Berat") {
+                                    noteField_{{ $key }}.setAttribute("required", "required");
+                                    noteField_{{ $key }}.placeholder = "Wajib diisi karena ada kerusakan";
+                                } else {
+                                    noteField_{{ $key }}.removeAttribute("required");
+                                    noteField_{{ $key }}.placeholder = "Catatan (opsional)";
+                                }
+                            }
+
+                            radios_{{ $key }}.forEach(radio => radio.addEventListener("change", updateRequirement_{{ $key }}));
+
+                            // Jalankan saat page load (untuk nilai existing)
+                            updateRequirement_{{ $key }}();
+
+                        @endforeach
+
+                    });
+                    </script>
 
                     {{-- Foto --}}
                     @php

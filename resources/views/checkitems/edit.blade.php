@@ -95,7 +95,33 @@
                         <h5 class="fw-bold">Checklist Kendaraan</h5>
                     </div>
 
-                    @foreach($items as $key => $label)
+                    @php
+                        $mechanicalItems = [
+                            'radiator' => 'Radiator',
+                            'air_filter' => 'Filter Udara',
+                            'wiper' => 'Wiper',
+                            'lights' => 'Lampu Kendaraan',
+                            'leaks' => 'Kebocoran Fluida',
+                            'hazards' => 'Lampu Hazard',
+                            'horn' => 'Klakson',
+                            'siren' => 'Sirine',
+                            'tires' => 'Ban',
+                            'brakes' => 'Rem',
+                            'battery' => 'Aki',
+                            'start_engine' => 'Mesin',
+                        ];
+
+                        $cleanlinessItems = [
+                            'glass_cleanliness' => 'Kaca',
+                            'body_cleanliness' => 'Body',
+                            'interior_cleanliness' => 'Interior'
+                        ];
+                    @endphp
+
+                    {{-- ========================= --}}
+                    {{--         MEKANIKAL        --}}
+                    {{-- ========================= --}}
+                    @foreach($mechanicalItems as $key => $label)
 
                         @php
                             $okField = $key . '_ok';
@@ -103,74 +129,176 @@
                         @endphp
 
                         <div class="col-md-12">
-                            <label class="form-label w-100 fw-bold text-uppercase">{{ $label }} <span class="text-danger">*</span></label>
+                            <label class="form-label w-100 fw-bold text-uppercase">
+                                {{ $label }} <span class="text-danger">*</span>
+                            </label>
 
                             <div class="d-flex flex-wrap align-items-center gap-3">
 
-                                {{-- Aman --}}
+                                {{-- Baik --}}
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio"
-                                           name="{{ $okField }}"
-                                           value="1"
-                                           id="{{ $key }}_ok1"
-                                           {{ old($okField, $item->$okField) == 1 ? 'checked' : '' }}
-                                           required>
-                                    <label class="form-check-label text-success fw-semibold" for="{{ $key }}_ok1">
-                                        Aman
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="{{ $okField }}"
+                                        value="Baik"
+                                        id="{{ $key }}_baik"
+                                        {{ old($okField, $item->$okField) == 'Baik' ? 'checked' : '' }}
+                                        required>
+                                    <label class="form-check-label text-success fw-semibold" for="{{ $key }}_baik">
+                                        Baik
                                     </label>
                                 </div>
 
-                                {{-- Tidak Aman --}}
+                                {{-- Rusak Ringan --}}
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio"
-                                           name="{{ $okField }}"
-                                           value="0"
-                                           id="{{ $key }}_ok0"
-                                           {{ old($okField, $item->$okField) == 0 ? 'checked' : '' }}>
-                                    <label class="form-check-label text-danger fw-semibold" for="{{ $key }}_ok0">
-                                        Tidak Aman
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="{{ $okField }}"
+                                        value="Rusak Ringan"
+                                        id="{{ $key }}_rr"
+                                        {{ old($okField, $item->$okField) == 'Rusak Ringan' ? 'checked' : '' }}>
+                                    <label class="form-check-label text-warning fw-semibold" for="{{ $key }}_rr">
+                                        Rusak Ringan
+                                    </label>
+                                </div>
+
+                                {{-- Rusak Berat --}}
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="{{ $okField }}"
+                                        value="Rusak Berat"
+                                        id="{{ $key }}_rb"
+                                        {{ old($okField, $item->$okField) == 'Rusak Berat' ? 'checked' : '' }}>
+                                    <label class="form-check-label text-danger fw-semibold" for="{{ $key }}_rb">
+                                        Rusak Berat
                                     </label>
                                 </div>
 
                                 {{-- Catatan --}}
                                 <div class="flex-grow-1">
                                     <input type="text"
-                                           class="form-control"
-                                           name="{{ $noteField }}"
-                                           value="{{ old($noteField, $item->$noteField) }}"
-                                           placeholder="Catatan (opsional)">
+                                        class="form-control"
+                                        name="{{ $noteField }}"
+                                        value="{{ old($noteField, $item->$noteField) }}"
+                                        placeholder="Catatan (opsional)">
                                 </div>
                             </div>
                         </div>
-                        <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-
-                            @foreach($items as $key => $label)
-                                const okField{{ $key }}1 = document.getElementById("{{ $key }}_ok1"); // Aman
-                                const okField{{ $key }}0 = document.getElementById("{{ $key }}_ok0"); // Tidak Aman
-                                const noteField{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
-
-                                function updateRequirement{{ $key }}() {
-                                    if (okField{{ $key }}0.checked) {
-                                        noteField{{ $key }}.setAttribute("required", "required");
-                                        noteField{{ $key }}.placeholder = "Wajib diisi jika tidak aman";
-                                    } else {
-                                        noteField{{ $key }}.removeAttribute("required");
-                                        noteField{{ $key }}.placeholder = "Catatan (opsional)";
-                                    }
-                                }
-
-                                okField{{ $key }}1.addEventListener('change', updateRequirement{{ $key }});
-                                okField{{ $key }}0.addEventListener('change', updateRequirement{{ $key }});
-
-                                // Set initial state (penting saat edit data dan saat error validation)
-                                updateRequirement{{ $key }}();
-                            @endforeach
-
-                        });
-                        </script>
-
                     @endforeach
+
+
+                    {{-- ========================= --}}
+                    {{--        KEBERSIHAN        --}}
+                    {{-- ========================= --}}
+                    @foreach($cleanlinessItems as $key => $label)
+
+                        @php
+                            $okField = $key . '_ok';
+                            $noteField = $key . '_note';
+                        @endphp
+
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label w-100 fw-bold text-uppercase">
+                                {{ $label }} <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+
+                                {{-- Bersih --}}
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="{{ $okField }}"
+                                        value="Bersih"
+                                        id="{{ $key }}_bersih"
+                                        {{ old($okField, $item->$okField) == 'Bersih' ? 'checked' : '' }}
+                                        required>
+                                    <label class="form-check-label text-success fw-semibold" for="{{ $key }}_bersih">
+                                        Bersih
+                                    </label>
+                                </div>
+
+                                {{-- Tidak Bersih --}}
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="{{ $okField }}"
+                                        value="Tidak Bersih"
+                                        id="{{ $key }}_tb"
+                                        {{ old($okField, $item->$okField) == 'Tidak Bersih' ? 'checked' : '' }}>
+                                    <label class="form-check-label text-danger fw-semibold" for="{{ $key }}_tb">
+                                        Tidak Bersih
+                                    </label>
+                                </div>
+
+                                {{-- Catatan --}}
+                                <div class="flex-grow-1">
+                                    <input type="text"
+                                        class="form-control"
+                                        name="{{ $noteField }}"
+                                        value="{{ old($noteField, $item->$noteField) }}"
+                                        placeholder="Catatan (opsional)">
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+
+                    {{-- ========================= --}}
+                    {{--       JAVASCRIPT         --}}
+                    {{-- ========================= --}}
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const mechanicalKeys = @json(array_keys($mechanicalItems));
+                        const cleanlinessKeys = @json(array_keys($cleanlinessItems));
+
+                        // Mekanik: wajib catatan jika rusak
+                        mechanicalKeys.forEach(key => {
+                            const good = document.getElementById(key + "_baik");
+                            const rr = document.getElementById(key + "_rr");
+                            const rb = document.getElementById(key + "_rb");
+
+                            const note = document.querySelector("input[name='"+ key +"_note']");
+
+                            function updateState() {
+                                if (rr.checked || rb.checked) {
+                                    note.required = true;
+                                    note.placeholder = "Wajib diisi jika rusak";
+                                } else {
+                                    note.required = false;
+                                    note.placeholder = "Catatan (opsional)";
+                                }
+                            }
+
+                            [good, rr, rb].forEach(el => el?.addEventListener('change', updateState));
+                            updateState();
+                        });
+
+                        // Kebersihan: wajib catatan jika tidak bersih
+                        cleanlinessKeys.forEach(key => {
+                            const bersih = document.getElementById(key + "_bersih");
+                            const tb = document.getElementById(key + "_tb");
+
+                            const note = document.querySelector("input[name='"+ key +"_note']");
+
+                            function updateState() {
+                                if (tb.checked) {
+                                    note.required = true;
+                                    note.placeholder = "Wajib diisi jika tidak bersih";
+                                } else {
+                                    note.required = false;
+                                    note.placeholder = "Catatan (opsional)";
+                                }
+                            }
+
+                            [bersih, tb].forEach(el => el?.addEventListener('change', updateState));
+                            updateState();
+                        });
+
+                    });
+                    </script>
 
                     {{-- Foto Lama --}}
                     @if($item->photos)

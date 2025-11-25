@@ -65,66 +65,90 @@
                             'battery' => 'Aki',
                             'start_engine' => 'Mesin',
                         ];
+
+                        $conditionOptions = [
+                            'Baik'         => 'text-success',
+                            'Rusak Ringan' => 'text-warning',
+                            'Rusak Berat'  => 'text-danger'
+                        ];
                     @endphp
 
                     @foreach($items as $key => $label)
-                        <div class="col-md-12">
-                            {{-- Label bagian atas --}}
+
+                        <div class="col-md-12 mb-3">
+
+                            {{-- Label --}}
                             <label class="form-label w-100 text-start fw-bold text-uppercase">
                                 {{ $label }} <span class="text-danger">*</span>
                             </label>
 
                             <div class="d-flex flex-wrap align-items-center gap-3">
-                                {{-- Radio Aman --}}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="{{ $key }}_ok" id="{{ $key }}_ok1" value="1"
-                                        {{ old($key.'_ok') == '1' ? 'checked' : '' }} required>
-                                    <label class="form-check-label fw-semibold text-success" for="{{ $key }}_ok1">Aman</label>
-                                </div>
 
-                                {{-- Radio Tidak Aman --}}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="{{ $key }}_ok" id="{{ $key }}_ok0" value="0"
-                                        {{ old($key.'_ok') == '0' ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-semibold text-danger" for="{{ $key }}_ok0">Tidak Aman</label>
-                                </div>
+                                {{-- Radio Options --}}
+                                @foreach($conditionOptions as $value => $color)
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                            type="radio"
+                                            name="{{ $key }}_ok"
+                                            id="{{ $key }}_ok_{{ $value }}"
+                                            value="{{ $value }}"
+                                            {{ old($key.'_ok') == $value ? 'checked' : '' }}
+                                            required>
+
+                                        <label class="form-check-label fw-semibold {{ $color }}"
+                                            for="{{ $key }}_ok_{{ $value }}">
+                                            {{ $value }}
+                                        </label>
+                                    </div>
+                                @endforeach
 
                                 {{-- Catatan --}}
                                 <div class="flex-grow-1">
-                                    <input type="text" name="{{ $key }}_note"
+                                    <input type="text"
+                                        name="{{ $key }}_note"
                                         class="form-control @error($key.'_note') is-invalid @enderror"
-                                        placeholder="Catatan (opsional)" value="{{ old($key.'_note') }}">
+                                        placeholder="Catatan (opsional)"
+                                        value="{{ old($key.'_note') }}">
                                 </div>
                             </div>
                         </div>
-                        <script>
-                        document.addEventListener("DOMContentLoaded", function () {
 
-                            @foreach($items as $key => $label)
-                                const radioAman{{ $key }} = document.getElementById("{{ $key }}_ok1");
-                                const radioTidakAman{{ $key }} = document.getElementById("{{ $key }}_ok0");
-                                const noteField{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
-
-                                function updateRequirement{{ $key }}() {
-                                    if (radioTidakAman{{ $key }}.checked) {
-                                        noteField{{ $key }}.setAttribute("required", "required");
-                                        noteField{{ $key }}.placeholder = "Wajib diisi jika tidak aman";
-                                    } else {
-                                        noteField{{ $key }}.removeAttribute("required");
-                                        noteField{{ $key }}.placeholder = "Catatan (opsional)";
-                                    }
-                                }
-
-                                radioAman{{ $key }}.addEventListener("change", updateRequirement{{ $key }});
-                                radioTidakAman{{ $key }}.addEventListener("change", updateRequirement{{ $key }});
-
-                                // Inisialisasi default
-                                updateRequirement{{ $key }}();
-                            @endforeach
-
-                        });
-                        </script>
                     @endforeach
+
+                    {{-- SCRIPT UNTUK WAJIB CATATAN JIKA RUSAK --}}
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        @foreach($items as $key => $label)
+
+                            const noteField_{{ $key }} = document.querySelector("input[name='{{ $key }}_note']");
+                            const radios_{{ $key }} = document.querySelectorAll("input[name='{{ $key }}_ok']");
+
+                            function updateRequirement_{{ $key }}() {
+                                let value = document.querySelector("input[name='{{ $key }}_ok']:checked");
+
+                                if (!value) return;
+
+                                if (value.value === "Rusak Ringan" || value.value === "Rusak Berat") {
+                                    noteField_{{ $key }}.setAttribute("required", "required");
+                                    noteField_{{ $key }}.placeholder = "Wajib diisi karena ada kerusakan";
+                                } else {
+                                    noteField_{{ $key }}.removeAttribute("required");
+                                    noteField_{{ $key }}.placeholder = "Catatan (opsional)";
+                                }
+                            }
+
+                            radios_{{ $key }}.forEach(radio => {
+                                radio.addEventListener("change", updateRequirement_{{ $key }});
+                            });
+
+                            // Inisialisasi di awal
+                            updateRequirement_{{ $key }}();
+
+                        @endforeach
+                    })
+                    </script>
+
 
                     {{-- Foto --}}
                     <div class="col-md-4">

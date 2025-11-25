@@ -137,7 +137,7 @@
                                             @endif
 
                                             {{-- HAPUS (hanya pending) --}}
-                                            @if(auth()->user()->role === 'Ketua Tim' && $checking->status === 'pending')
+                                            @if(auth()->user()->role === 'Ketua Tim' && auth()->user()->team_id == $checking->team_id && $checking->status === 'pending')
                                                 <button class="btn btn-danger btn-sm"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#hapus{{ $checking->id }}">

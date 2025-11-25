@@ -43,7 +43,7 @@
                             @enderror
                         </div>
                         <div class="pt-1 mb-5">
-                            <button class="button shadow-sm btn w-100 fw-semibold" style="" type="submit">Masuk</button>
+                            <button class="button shadow-sm btn btn-warning w-100 fw-semibold" style="" type="submit">Masuk</button>
                         </div>
                         <div class="text-center mt-2">
                             <a href="{{ route('external.login') }}" class="btn btn-link">Masuk sebagai External / Pengguna Luar</a>

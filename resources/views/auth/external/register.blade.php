@@ -108,7 +108,7 @@
 
                         {{-- Submit --}}
                         <div class="pt-1 mb-3">
-                            <button class="button btn shadow-sm w-100 fw-semibold" type="submit">
+                            <button class="button btn btn-primary shadow-sm w-100 fw-semibold" type="submit">
                                 Daftar
                             </button>
                         </div>
