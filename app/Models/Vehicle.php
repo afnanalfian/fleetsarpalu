@@ -46,7 +46,10 @@ class Vehicle extends Model
     {
         return $this->hasMany(CheckItem::class);
     }
-
+    public function oilChanges()
+    {
+        return $this->hasMany(OilChange::class);
+    }
     /**
      * ✅ Helper: apakah kendaraan sedang dipinjam
      */

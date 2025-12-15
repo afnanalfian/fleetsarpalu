@@ -44,8 +44,18 @@ class VehicleController extends Controller
 
     public function show($id)
     {
-        $vehicle = Vehicle::findOrFail($id);
-        return view('vehicles.show', compact('vehicle'));
+        $vehicle = Vehicle::with([
+            'oilChanges' => function ($q) {
+                $q->latest('date')->limit(1);
+            }
+        ])->findOrFail($id);
+
+        $lastOilChangeDate = $vehicle->oilChanges->first()?->date;
+
+        return view('vehicles.show', compact(
+            'vehicle',
+            'lastOilChangeDate'
+        ));
     }
 
     public function edit($id)

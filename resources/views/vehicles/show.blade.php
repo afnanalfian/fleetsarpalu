@@ -32,16 +32,40 @@
                 {{-- Detail Kendaraan --}}
                 <div class="bg-white p-3 rounded shadow-sm">
                     @if(in_array(strtolower(auth()->user()->role), ['admin', 'kepala sumber daya','pegawai','ketua tim']))
-                    @php
-                        $needOilChange = ($vehicle->distance - $vehicle->last_km_for_oil) >= $vehicle->oil_change_interval;
-                    @endphp
+                        @php
+                            $distanceSinceOilChange = $vehicle->distance - $vehicle->last_km_for_oil;
 
-                    @if ($needOilChange)
-                        <div class="alert alert-danger fw-bold">
-                            ⚠️ Perlu Ganti Oli! Kendaraan sudah menempuh {{ $vehicle->distance - $vehicle->last_km_for_oil }} km
-                            sejak ganti oli terakhir. Batas interval: {{ $vehicle->oil_change_interval }} km.
-                        </div>
-                    @endif
+                            $overKmInterval = $distanceSinceOilChange >= $vehicle->oil_change_interval;
+
+                            $overDateInterval = false;
+                            if ($lastOilChangeDate) {
+                                $overDateInterval = \Carbon\Carbon::now()
+                                    ->greaterThanOrEqualTo(
+                                        \Carbon\Carbon::parse($lastOilChangeDate)->addMonth()
+                                    );
+                            }
+
+                            $needOilChange = $overKmInterval || $overDateInterval;
+                        @endphp
+
+                        @if ($needOilChange)
+                            <div class="alert alert-danger fw-bold">
+                                ⚠️ <strong>Perlu Ganti Oli!</strong><br>
+
+                                @if ($overKmInterval)
+                                    • Kendaraan sudah menempuh
+                                    <strong>{{ $distanceSinceOilChange }} km</strong>
+                                    sejak ganti oli terakhir (interval: {{ $vehicle->oil_change_interval }} km).<br>
+                                @endif
+
+                                @if ($overDateInterval)
+                                    • Sudah lebih dari
+                                    <strong>1 bulan</strong>
+                                    sejak ganti oli terakhir
+                                    ({{ \Carbon\Carbon::parse($lastOilChangeDate)->format('d M Y') }}).
+                                @endif
+                            </div>
+                        @endif
                     @endif
 
                     <h5 class="fw-bold mb-3">Detail Kendaraan</h5>
@@ -115,6 +139,10 @@
                             <tr>
                                 <th>KM Terakhir Ganti Oli</th>
                                 <td>{{ $vehicle->last_km_for_oil }} km</td>
+                            </tr>
+                            <tr>
+                                <th>Tanggal Terakhir Ganti Oli</th>
+                                <td>{{ $lastOilChangeDate?->format('d M Y') ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <th>Interval Ganti Oli</th>

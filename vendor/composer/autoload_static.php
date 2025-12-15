@@ -48,6 +48,7 @@ class ComposerStaticInit9c3c4cad61aff6d450fa4832dee1ea06
         '0c3c22e27afa83be19b4c938f4c6e9ea' => __DIR__ . '/..' . '/spatie/laravel-backup/src/Helpers/functions.php',
         '320163ac6b93aebe3dc25b60a0533d56' => __DIR__ . '/..' . '/spatie/laravel-ignition/src/helpers.php',
         'b28282bf56ed60c93bfbfb861c9643eb' => __DIR__ . '/../..' . '/app/Helpers/Notify.php',
+        '23c692acd726e3ba45637dba554d13a6' => __DIR__ . '/../..' . '/app/Helpers/OilChangeNotifier.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -495,8 +496,8 @@ class ComposerStaticInit9c3c4cad61aff6d450fa4832dee1ea06
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri-interfaces',
-            1 => __DIR__ . '/..' . '/league/uri',
+            0 => __DIR__ . '/..' . '/league/uri',
+            1 => __DIR__ . '/..' . '/league/uri-interfaces',
         ),
         'League\\MimeTypeDetection\\' => 
         array (

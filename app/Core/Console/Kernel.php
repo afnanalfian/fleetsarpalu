@@ -14,8 +14,12 @@ class Kernel extends ConsoleKernel
 
         // backup baru
         $schedule->command('backup:run')->dailyAt('01:00');
-    }
 
+        // Notifikasi kendaraan perlu ganti oli
+        $schedule->call(function () {
+            notifyOilChangeVehicles();
+        })->dailyAt('08:00');
+    }
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
