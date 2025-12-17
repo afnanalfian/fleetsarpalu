@@ -20,20 +20,26 @@ class CheckingController extends Controller
         $user = auth()->user();
 
         $query = Check::with('team')
-            ->orderBy('scheduled_date', 'desc')
-            ->where(function ($q) use ($user) {
+            ->orderBy('scheduled_date', 'desc');
 
-                // 1. Jika pegawai atau ketua tim → hanya pengecekan tim nya
+        // Role yang boleh lihat SEMUA data
+        $fullAccessRoles = ['admin', 'kepala sumber daya'];
+
+        if (!in_array(strtolower($user->role), $fullAccessRoles)) {
+            $query->where(function ($q) use ($user) {
+
+                // Pegawai & Ketua Tim → hanya tim sendiri
                 if (in_array(strtolower($user->role), ['pegawai', 'ketua tim'])) {
                     $q->where('team_id', $user->team_id);
                 }
 
-                // 2. Tambahkan pengecekan yang dia menjadi PENGGANTI
+                // Atau pengecekan di mana dia menjadi pengganti
                 $q->orWhereHas('attendances', function ($att) use ($user) {
                     $att->where('user_id', $user->id)
                         ->where('is_replacement', true);
                 });
             });
+        }
 
         // Filter berdasarkan bulan & tahun
         if ($request->filled('bulan') && $request->filled('tahun')) {
