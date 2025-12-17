@@ -23,11 +23,11 @@ function notify($user_id, $title, $message, $link = null) {
         'link' => $link
     ]);
 
-    $user = User::find($user_id);
+    // $user = User::find($user_id);
 
-    if ($user && $user->email) {
-        // Kirim email
-        Mail::to($user->email)
-            ->send(new UserNotificationMail($title, $message, $link));
-    }
+    // if ($user && $user->email) {
+    //     // Kirim email
+    //     Mail::to($user->email)
+    //         ->send(new UserNotificationMail($title, $message, $link));
+    // }
 }
