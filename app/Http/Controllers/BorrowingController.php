@@ -20,6 +20,7 @@ class BorrowingController extends Controller
         // Update otomatis status
         BorrowRequest::with('vehicle')->chunk(100, function ($rows) {
             foreach ($rows as $b) {
+                $b->updateStatusAutomatically();
                 $b->syncVehicleStatus();
             }
         });
