@@ -60,9 +60,21 @@ class BorrowRequest extends Model
             return;
         }
 
-        $start = Carbon::parse($this->start_at->format('Y-m-d').' '.$this->start_time);
-        $end   = Carbon::parse($this->end_at->format('Y-m-d').' '.$this->end_time);
-        $now   = now();
+        $tz = config('app.timezone');
+
+        $start = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $this->start_at->format('Y-m-d').' '.$this->start_time,
+            $tz
+        );
+
+        $end = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $this->end_at->format('Y-m-d').' '.$this->end_time,
+            $tz
+        );
+
+        $now = now($tz);
 
         // === Approved → In Use ===
         if ($this->status === 'Approved' && $now->between($start, $end)) {

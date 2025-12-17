@@ -18,9 +18,10 @@ class BorrowingController extends Controller
     public function index(Request $request)
     {
         // Update otomatis status
-        BorrowRequest::with('vehicle')->get()->each(function ($b) {
-            $b->updateStatusAutomatically();
-            $b->syncVehicleStatus();
+        BorrowRequest::with('vehicle')->chunk(100, function ($rows) {
+            foreach ($rows as $b) {
+                $b->syncVehicleStatus();
+            }
         });
 
         $user = Auth::user();

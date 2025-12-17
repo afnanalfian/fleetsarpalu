@@ -19,6 +19,11 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             notifyOilChangeVehicles();
         })->dailyAt('08:00');
+
+        $schedule->command('borrowings:update-status')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
     protected function commands(): void
     {
