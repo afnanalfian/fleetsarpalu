@@ -82,17 +82,27 @@ class FlatsarSeeder extends Seeder
         ];
 
         foreach ($users as $u) {
-            User::create([
+
+            $teamId = $u[5] ? $teamIds[$u[5]] : null;
+
+            $user = User::create([
                 'name' => $u[0],
                 'nip' => $u[1],
                 'email' => $u[2],
                 'phone' => $u[3],
                 'role' => $u[4],
-                'team_id' => $u[5] ? $teamIds[$u[5]] : null,
+                'team_id' => $teamId,
                 'institution' => null,
                 'password' => Hash::make('password'),
                 'email_verified_at' => Carbon::now(),
             ]);
+
+            // Jika user adalah Ketua Tim, set sebagai leader tim
+            if ($u[4] === 'Ketua Tim' && $teamId) {
+                Team::where('id', $teamId)->update([
+                    'leader_id' => $user->id
+                ]);
+            }
         }
 
         /* ===========================
