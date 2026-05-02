@@ -145,6 +145,73 @@ class ScheduleController extends Controller
     //     return back()->with('success', "Jadwal bulan {$month}/{$year} berhasil digenerate.");
     // }
 
+    // public function generate(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'month' => 'required|integer|min:1|max:12',
+    //         'year'  => 'required|integer|min:2000|max:2100',
+    //     ]);
+
+    //     $month = $data['month'];
+    //     $year  = $data['year'];
+
+    //     $start = Carbon::create($year, $month, 1);
+    //     $end   = $start->copy()->endOfMonth();
+
+    //     $teams = Team::orderBy('id')->get();
+
+    //     // ============================================================
+    //     // POLA BARU: Siklus 28 hari per regu, patokan mulai 1 April 2026
+    //     // Diextract dari jadwal referensi gambar April 2026
+    //     // ============================================================
+    //     $cycles = [
+    //         'ALFA'    => ['R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R'],
+    //         'BRAVO'   => ['S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R'],
+    //         'CHARLIE' => ['R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1'],
+    //         'DELTA'   => ['S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R'],
+    //         'ECHO'    => ['R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2'],
+    //     ];
+
+    //     // Tanggal patokan awal (1 April 2026 = index 0 dari siklus)
+    //     $anchor = Carbon::create(2026, 4, 1);
+
+    //     // Delete existing schedule for this month
+    //     Schedule::whereBetween('date', [$start, $end])->delete();
+
+    //     foreach ($teams as $team) {
+    //         $cycle = $cycles[$team->name] ?? null;
+
+    //         if (!$cycle) {
+    //             continue; // skip jika nama team tidak dikenal
+    //         }
+
+    //         $cycleLength = count($cycle); // 28 hari (kecuali April yg 30, sisanya di-modulo)
+
+    //         foreach (CarbonPeriod::create($start, $end) as $day) {
+    //             // Hitung selisih hari dari anchor (1 April 2026)
+    //             $daysDiff = $anchor->diffInDays($day, false);
+
+    //             // Modulo siklus 28 hari, pastikan positif
+    //             // Untuk bulan sebelum April 2026, daysDiff bisa negatif
+    //             $index = (($daysDiff % 28) + 28) % 28;
+
+    //             $shift = $cycle[$index];
+
+    //             Schedule::updateOrCreate(
+    //                 [
+    //                     'team_id' => $team->id,
+    //                     'date'    => $day->toDateString(),
+    //                 ],
+    //                 [
+    //                     'shift' => $shift,
+    //                 ]
+    //             );
+    //         }
+    //     }
+
+    //     return back()->with('success', "Jadwal bulan {$month}/{$year} berhasil digenerate.");
+    // }
+
     public function generate(Request $request)
     {
         $data = $request->validate([
@@ -161,19 +228,20 @@ class ScheduleController extends Controller
         $teams = Team::orderBy('id')->get();
 
         // ============================================================
-        // POLA BARU: Siklus 28 hari per regu, patokan mulai 1 April 2026
-        // Diextract dari jadwal referensi gambar April 2026
+        // POLA BARU: Patokan 1 Mei 2026
+        // Siklus 30 hari per regu (diextract dari jadwal Mei 2026)
+        // Hari ke-31 dst loop kembali ke index 0
         // ============================================================
         $cycles = [
-            'ALFA'    => ['R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R'],
-            'BRAVO'   => ['S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R'],
-            'CHARLIE' => ['R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1'],
-            'DELTA'   => ['S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2','R','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R'],
-            'ECHO'    => ['R','R','S1','LB','S2','R','R','S1','R','S2','LB','LB','S1','R','S2','R','R','S1','LB','S2','R','R','S1','R','S2','LB','R','S1','R','S2'],
+            'ALFA'    => ['R','S1','S2','R','R','R','S1','S2','LB','LB','R','S1','S2','R','R','LB','S1','S2','R','R','R','S1','S2','LB','R','R','S1','S2','R','LB'],
+            'BRAVO'   => ['S1','S2','LB','R','R','S1','S2','R','LB','LB','S1','S2','R','R','R','S1','S2','R','R','R','S1','S2','LB','LB','R','S1','S2','R','R','LB'],
+            'CHARLIE' => ['S2','LB','LB','R','S1','S2','R','R','LB','S1','S2','R','R','R','S1','S2','LB','R','R','S1','S2','R','LB','LB','S1','S2','R','R','R','S1'],
+            'DELTA'   => ['R','LB','LB','S1','S2','R','R','R','S1','S2','R','R','R','S1','S2','LB','LB','R','S1','S2','R','R','LB','S1','S2','R','R','R','S1','S2'],
+            'ECHO'    => ['R','LB','S1','S2','R','R','R','S1','S2','LB','R','R','S1','S2','R','LB','LB','S1','S2','R','R','R','S1','S2','R','R','R','S1','S2','LB'],
         ];
 
-        // Tanggal patokan awal (1 April 2026 = index 0 dari siklus)
-        $anchor = Carbon::create(2026, 4, 1);
+        // Anchor: 1 Mei 2026 = index 0
+        $anchor = Carbon::create(2026, 5, 1);
 
         // Delete existing schedule for this month
         Schedule::whereBetween('date', [$start, $end])->delete();
@@ -182,18 +250,17 @@ class ScheduleController extends Controller
             $cycle = $cycles[$team->name] ?? null;
 
             if (!$cycle) {
-                continue; // skip jika nama team tidak dikenal
+                continue;
             }
 
-            $cycleLength = count($cycle); // 28 hari (kecuali April yg 30, sisanya di-modulo)
+            $cycleLength = count($cycle); // 30
 
             foreach (CarbonPeriod::create($start, $end) as $day) {
-                // Hitung selisih hari dari anchor (1 April 2026)
+                // Selisih hari dari anchor (bisa negatif untuk bulan sebelum Mei 2026)
                 $daysDiff = $anchor->diffInDays($day, false);
 
-                // Modulo siklus 28 hari, pastikan positif
-                // Untuk bulan sebelum April 2026, daysDiff bisa negatif
-                $index = (($daysDiff % 28) + 28) % 28;
+                // Modulo aman (positif) untuk siklus 30 hari
+                $index = (($daysDiff % $cycleLength) + $cycleLength) % $cycleLength;
 
                 $shift = $cycle[$index];
 
